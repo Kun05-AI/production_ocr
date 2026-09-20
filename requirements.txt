@@ -11,3 +11,7 @@ uvicorn[standard]
 python-multipart
 pydantic>=2
 openpyxl
+
+git clone https://github.com/Kun05-AI/production_ocr.git
+cd production_ocr
+python -m venv .venv
