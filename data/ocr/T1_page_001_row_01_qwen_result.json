@@ -1,0 +1,11 @@
+{
+  "page": "T1_page_001",
+  "row": 1,
+  "text": "1 2/1  PO2+03+04+09  8h15' 16h30' 4h30  4  4  0  GC Pin +thu-",
+  "generated_tokens": 53,
+  "inference_time_seconds": 4.485,
+  "crop": {
+    "width": 3340,
+    "height": 83
+  }
+}

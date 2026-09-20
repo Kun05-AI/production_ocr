@@ -1,0 +1,11 @@
+{
+  "page": "T1_page_001",
+  "row": 4,
+  "text": "[UNK] [UNK] 25055 14 31 15h 16h40 16h40 Set up chấu",
+  "generated_tokens": 39,
+  "inference_time_seconds": 7.073,
+  "crop": {
+    "width": 3340,
+    "height": 83
+  }
+}

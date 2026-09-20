@@ -1,0 +1,11 @@
+{
+  "page": "T1_page_001",
+  "row": 2,
+  "text": "2\nPRC 25N2-06Z\n11h15 14h20 2h20\nHướng dẫn NV Qm",
+  "generated_tokens": 38,
+  "inference_time_seconds": 5.602,
+  "crop": {
+    "width": 3340,
+    "height": 83
+  }
+}

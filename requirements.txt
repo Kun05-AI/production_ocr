@@ -1,0 +1,13 @@
+
+transformers>=4.57.1
+accelerate
+bitsandbytes
+Pillow
+PyMuPDF
+opencv-python
+numpy
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic>=2
+openpyxl

@@ -1,0 +1,93 @@
+{
+  "form_id": "T1",
+  "department": "SanXuat",
+  "version": "v1",
+  "page": {
+    "width": 3509,
+    "height": 2481,
+    "orientation": "landscape"
+  },
+  "registration": {
+    "method": "ecc_affine",
+    "reference_image": "reference.png",
+    "roi": [50, 470, 3480, 2110],
+    "max_feature_dimension": 1600,
+    "ecc_iterations": 150,
+    "ecc_epsilon": 0.000001,
+    "min_ecc_correlation": 0.60,
+    "max_translation_px": 80,
+    "max_rotation_deg": 2.5,
+    "max_scale_deviation": 0.03,
+    "max_shear": 0.03
+  },
+  "row_strategy": {
+    "type": "fixed",
+    "count": 20
+  },
+  "page_slots": 20,
+  "geometry": {
+    "table": {
+      "x1": 94,
+      "x2": 3466,
+      "y1": 495,
+      "y2": 2080
+    },
+    "horizontal_lines": [
+      495,
+      574,
+      654,
+      733,
+      813,
+      892,
+      972,
+      1050,
+      1129,
+      1209,
+      1287,
+      1366,
+      1446,
+      1525,
+      1603,
+      1683,
+      1762,
+      1842,
+      1921,
+      2001,
+      2080
+    ],
+    "vertical_lines": [
+      94,
+      184,
+      349,
+      592,
+      967,
+      1360,
+      1522,
+      1687,
+      1852,
+      2016,
+      2179,
+      2344,
+      2508,
+      3159,
+      3466
+    ],
+    "columns": 14
+  },
+  "fields": [
+    "stt",
+    "date",
+    "order_code",
+    "drawing_code",
+    "work_code",
+    "target_time",
+    "start_time",
+    "end_time",
+    "total_time",
+    "processed_qty",
+    "good_qty",
+    "ng_qty",
+    "process_detail",
+    "note"
+  ]
+}

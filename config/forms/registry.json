@@ -1,0 +1,12 @@
+{
+  "registry_version": 1,
+  "forms": [
+    {
+      "form_id": "T1",
+      "department": "SanXuat",
+      "version": "v1",
+      "config_path": "T1/v1",
+      "description": "T1 production daily report form, version 1"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "total_images": 7,
+  "target_size": {
+    "width": 3509,
+    "height": 2481
+  },
+  "images": [
+    {
+      "input": "D:\\production_ocr\\data\\pages\\T1_page_001.png",
+      "output": "D:\\production_ocr\\data\\preprocessed\\pages\\T1_page_001.png",
+      "original_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "final_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "rotated": false,
+      "resized": false,
+      "target_size": {
+        "width": 3509,
+        "height": 2481
+      }
+    },
+    {
+      "input": "D:\\production_ocr\\data\\pages\\T1_page_002.png",
+      "output": "D:\\production_ocr\\data\\preprocessed\\pages\\T1_page_002.png",
+      "original_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "final_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "rotated": false,
+      "resized": false,
+      "target_size": {
+        "width": 3509,
+        "height": 2481
+      }
+    },
+    {
+      "input": "D:\\production_ocr\\data\\pages\\T1_page_003.png",
+      "output": "D:\\production_ocr\\data\\preprocessed\\pages\\T1_page_003.png",
+      "original_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "final_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "rotated": false,
+      "resized": false,
+      "target_size": {
+        "width": 3509,
+        "height": 2481
+      }
+    },
+    {
+      "input": "D:\\production_ocr\\data\\pages\\T1_page_004.png",
+      "output": "D:\\production_ocr\\data\\preprocessed\\pages\\T1_page_004.png",
+      "original_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "final_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "rotated": false,
+      "resized": false,
+      "target_size": {
+        "width": 3509,
+        "height": 2481
+      }
+    },
+    {
+      "input": "D:\\production_ocr\\data\\pages\\T1_page_005.png",
+      "output": "D:\\production_ocr\\data\\preprocessed\\pages\\T1_page_005.png",
+      "original_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "final_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "rotated": false,
+      "resized": false,
+      "target_size": {
+        "width": 3509,
+        "height": 2481
+      }
+    },
+    {
+      "input": "D:\\production_ocr\\data\\pages\\T1_page_006.png",
+      "output": "D:\\production_ocr\\data\\preprocessed\\pages\\T1_page_006.png",
+      "original_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "final_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "rotated": false,
+      "resized": false,
+      "target_size": {
+        "width": 3509,
+        "height": 2481
+      }
+    },
+    {
+      "input": "D:\\production_ocr\\data\\pages\\T1_page_007.png",
+      "output": "D:\\production_ocr\\data\\preprocessed\\pages\\T1_page_007.png",
+      "original_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "final_size": {
+        "width": 3509,
+        "height": 2481
+      },
+      "rotated": false,
+      "resized": false,
+      "target_size": {
+        "width": 3509,
+        "height": 2481
+      }
+    }
+  ]
+}

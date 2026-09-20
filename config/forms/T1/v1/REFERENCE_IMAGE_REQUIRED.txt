@@ -1,0 +1,10 @@
+Copy the approved preprocessed T1 reference page here and rename it to:
+
+reference.png
+
+Expected size: 3509 x 2481 px.
+
+Recommended first reference for the current test:
+D:\production_ocr\data\preprocessed\pages\T1_page_001.png
+
+This is a calibration candidate, not a claim that page 1 is the ideal permanent blank-form reference.

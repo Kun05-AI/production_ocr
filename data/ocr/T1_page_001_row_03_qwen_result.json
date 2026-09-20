@@ -1,0 +1,11 @@
+{
+  "page": "T1_page_001",
+  "row": 3,
+  "text": "3/1\n8h10 14h50 5h40 4 4 0 Gc Pin +hu²",
+  "generated_tokens": 32,
+  "inference_time_seconds": 3.199,
+  "crop": {
+    "width": 3340,
+    "height": 83
+  }
+}

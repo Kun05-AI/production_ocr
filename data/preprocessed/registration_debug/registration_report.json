@@ -1,0 +1,917 @@
+{
+  "form_id": "T1",
+  "version": "v1",
+  "reference_image": "D:\\production_ocr\\config\\forms\\T1\\v1\\reference.png",
+  "input_dir": "D:\\production_ocr\\data\\preprocessed\\pages",
+  "total_pages": 7,
+  "summary": {
+    "pass": 7,
+    "review": 0,
+    "error": 0,
+    "methods": {
+      "identity_reference": 1,
+      "ecc_multistart": 6
+    }
+  },
+  "pages": [
+    {
+      "page": "T1_page_001.png",
+      "status": "PASS",
+      "method": "identity_reference",
+      "quality_score": 1.0,
+      "ecc_correlation": 1.0,
+      "translation_x_px": 0.0,
+      "translation_y_px": 0.0,
+      "rotation_deg": 0.0,
+      "scale_x": 1.0,
+      "scale_y": 1.0,
+      "shear": 0.0,
+      "inliers": null,
+      "inlier_ratio": null,
+      "message": "Input page is identical to the reference image.",
+      "details": {
+        "ecc_candidates": [],
+        "selected_seed": "identity_reference"
+      }
+    },
+    {
+      "page": "T1_page_002.png",
+      "status": "PASS",
+      "method": "ecc_multistart",
+      "quality_score": 0.9472559199193225,
+      "ecc_correlation": 0.9434624634270307,
+      "translation_x_px": -5.228546142578125,
+      "translation_y_px": 17.333953857421875,
+      "rotation_deg": -0.6710797032911759,
+      "scale_x": 1.0002020001843257,
+      "scale_y": 0.9997342267406812,
+      "shear": 0.0009660417034249,
+      "inliers": null,
+      "inlier_ratio": null,
+      "message": "Multi-start ECC accepted seed=identity; quality=0.9473; ecc=0.9435.",
+      "details": {
+        "ecc_candidates": [
+          {
+            "seed": "identity",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "ecc_correlation": 0.9434624634270307,
+            "status": "VALIDATED",
+            "quality_score": 0.9472559199193225,
+            "structural_score": 0.9122146368026733,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -5.228546142578125,
+              "translation_y_px": 17.333953857421875,
+              "rotation_deg": -0.6710797032911759,
+              "scale_x": 1.0002020001843257,
+              "scale_y": 0.9997342267406812,
+              "shear": 0.0009660417034249
+            },
+            "message": "structural_score=0.9122; within transform limits"
+          },
+          {
+            "seed": "tx_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "ecc_correlation": 0.7410729367063809,
+            "status": "VALIDATED",
+            "quality_score": 0.7735572196015177,
+            "structural_score": 0.6987077593803406,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": 73.84341430664062,
+              "translation_y_px": 15.871795654296875,
+              "rotation_deg": -0.663461588501457,
+              "scale_x": 0.9811576960159664,
+              "scale_y": 1.0001846954510678,
+              "shear": 0.022757520395332693
+            },
+            "message": "structural_score=0.6987; within transform limits"
+          },
+          {
+            "seed": "tx_minus",
+            "initialization": {
+              "tx": -20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "ecc_correlation": 0.705288242569242,
+            "status": "VALIDATED",
+            "quality_score": 0.7461167175466537,
+            "structural_score": 0.682766318321228,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -42.058860778808594,
+              "translation_y_px": 17.658935546875,
+              "rotation_deg": -0.6593969867221968,
+              "scale_x": 0.9992789178631918,
+              "scale_y": 0.9999031517464666,
+              "shear": 0.010724418380012526
+            },
+            "message": "structural_score=0.6828; within transform limits"
+          },
+          {
+            "seed": "ty_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": -0.75
+            },
+            "ecc_correlation": 0.9434627104467008,
+            "status": "VALIDATED",
+            "quality_score": 0.9472554401622313,
+            "structural_score": 0.9122102856636047,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -5.228553771972656,
+              "translation_y_px": 17.33380126953125,
+              "rotation_deg": -0.6710732217409717,
+              "scale_x": 1.0002021180764955,
+              "scale_y": 0.9997341651571718,
+              "shear": 0.0009659990925020276
+            },
+            "message": "structural_score=0.9122; within transform limits"
+          },
+          {
+            "seed": "tx_plus_rot_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus_rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": -0.75
+            },
+            "ecc_correlation": 0.9342083521272354,
+            "status": "VALIDATED",
+            "quality_score": 0.93488339596092,
+            "structural_score": 0.8729169964790344,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -5.1706695556640625,
+              "translation_y_px": -61.92767333984375,
+              "rotation_deg": -0.669454339214675,
+              "scale_x": 1.000014437273984,
+              "scale_y": 0.9997072485211463,
+              "shear": 0.0009161832052141144
+            },
+            "message": "structural_score=0.8729; within transform limits"
+          }
+        ],
+        "selected_seed": "identity"
+      }
+    },
+    {
+      "page": "T1_page_003.png",
+      "status": "PASS",
+      "method": "ecc_multistart",
+      "quality_score": 0.8346124012676933,
+      "ecc_correlation": 0.8265644339448014,
+      "translation_x_px": -19.882963180541992,
+      "translation_y_px": 35.589935302734375,
+      "rotation_deg": 0.3685630009653081,
+      "scale_x": 0.9972974760243273,
+      "scale_y": 1.005955793372755,
+      "shear": 0.010671413356791656,
+      "inliers": null,
+      "inlier_ratio": null,
+      "message": "Multi-start ECC accepted seed=rot_plus; quality=0.8346; ecc=0.8266.",
+      "details": {
+        "ecc_candidates": [
+          {
+            "seed": "identity",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_minus",
+            "initialization": {
+              "tx": -20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "ecc_correlation": 0.8265644339448014,
+            "status": "VALIDATED",
+            "quality_score": 0.8346124012676933,
+            "structural_score": 0.7067819833755493,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -19.882963180541992,
+              "translation_y_px": 35.589935302734375,
+              "rotation_deg": 0.3685630009653081,
+              "scale_x": 0.9972974760243273,
+              "scale_y": 1.005955793372755,
+              "shear": 0.010671413356791656
+            },
+            "message": "structural_score=0.7068; within transform limits"
+          },
+          {
+            "seed": "rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": -0.75
+            },
+            "ecc_correlation": 0.6147526790589468,
+            "status": "VALIDATED",
+            "quality_score": 0.6635516815307998,
+            "structural_score": 0.5548320412635803,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": 37.172203063964844,
+              "translation_y_px": -44.312225341796875,
+              "rotation_deg": 0.3666436945156338,
+              "scale_x": 0.9968801398369368,
+              "scale_y": 1.006094014456991,
+              "shear": 0.003675406349197852
+            },
+            "message": "structural_score=0.5548; within transform limits"
+          },
+          {
+            "seed": "tx_plus_rot_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus_rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": -0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          }
+        ],
+        "selected_seed": "rot_plus"
+      }
+    },
+    {
+      "page": "T1_page_004.png",
+      "status": "PASS",
+      "method": "ecc_multistart",
+      "quality_score": 0.8986227935958127,
+      "ecc_correlation": 0.8973929933718584,
+      "translation_x_px": -21.49820899963379,
+      "translation_y_px": 36.26300048828125,
+      "rotation_deg": 0.3243431175772307,
+      "scale_x": 0.998016433798456,
+      "scale_y": 1.0061742546350607,
+      "shear": 0.009475097008067753,
+      "inliers": null,
+      "inlier_ratio": null,
+      "message": "Multi-start ECC accepted seed=rot_plus; quality=0.8986; ecc=0.8974.",
+      "details": {
+        "ecc_candidates": [
+          {
+            "seed": "identity",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_minus",
+            "initialization": {
+              "tx": -20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "ecc_correlation": 0.8973929933718584,
+            "status": "VALIDATED",
+            "quality_score": 0.8986227935958127,
+            "structural_score": 0.8029846549034119,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -21.49820899963379,
+              "translation_y_px": 36.26300048828125,
+              "rotation_deg": 0.3243431175772307,
+              "scale_x": 0.998016433798456,
+              "scale_y": 1.0061742546350607,
+              "shear": 0.009475097008067753
+            },
+            "message": "structural_score=0.8030; within transform limits"
+          },
+          {
+            "seed": "rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": -0.75
+            },
+            "ecc_correlation": 0.6707380286623013,
+            "status": "VALIDATED",
+            "quality_score": 0.7128777802227219,
+            "structural_score": 0.6224077343940735,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": 38.62601852416992,
+              "translation_y_px": -43.6253662109375,
+              "rotation_deg": 0.3207952085248647,
+              "scale_x": 0.9984908443051351,
+              "scale_y": 1.0064247629842582,
+              "shear": 0.011751878220845283
+            },
+            "message": "structural_score=0.6224; within transform limits"
+          },
+          {
+            "seed": "tx_plus_rot_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus_rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": -0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          }
+        ],
+        "selected_seed": "rot_plus"
+      }
+    },
+    {
+      "page": "T1_page_005.png",
+      "status": "PASS",
+      "method": "ecc_multistart",
+      "quality_score": 0.8815429933196153,
+      "ecc_correlation": 0.8713396968338951,
+      "translation_x_px": -17.843765258789062,
+      "translation_y_px": -32.343475341796875,
+      "rotation_deg": 0.16522268122428727,
+      "scale_x": 0.9968910538833186,
+      "scale_y": 1.0064422191190987,
+      "shear": 0.008668150142612773,
+      "inliers": null,
+      "inlier_ratio": null,
+      "message": "Multi-start ECC accepted seed=rot_minus; quality=0.8815; ecc=0.8713.",
+      "details": {
+        "ecc_candidates": [
+          {
+            "seed": "identity",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_minus",
+            "initialization": {
+              "tx": -20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": -0.75
+            },
+            "ecc_correlation": 0.8713396968338951,
+            "status": "VALIDATED",
+            "quality_score": 0.8815429933196153,
+            "structural_score": 0.8107013702392578,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -17.843765258789062,
+              "translation_y_px": -32.343475341796875,
+              "rotation_deg": 0.16522268122428727,
+              "scale_x": 0.9968910538833186,
+              "scale_y": 1.0064422191190987,
+              "shear": 0.008668150142612773
+            },
+            "message": "structural_score=0.8107; within transform limits"
+          },
+          {
+            "seed": "tx_plus_rot_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus_rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": -0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          }
+        ],
+        "selected_seed": "rot_minus"
+      }
+    },
+    {
+      "page": "T1_page_006.png",
+      "status": "PASS",
+      "method": "ecc_multistart",
+      "quality_score": 0.9138229393453949,
+      "ecc_correlation": 0.9043861831215952,
+      "translation_x_px": -9.87606430053711,
+      "translation_y_px": 0.623870849609375,
+      "rotation_deg": -0.38902555000607536,
+      "scale_x": 0.9988621045501256,
+      "scale_y": 0.9964177389144093,
+      "shear": 0.002474741320187991,
+      "inliers": null,
+      "inlier_ratio": null,
+      "message": "Multi-start ECC accepted seed=rot_minus; quality=0.9138; ecc=0.9044.",
+      "details": {
+        "ecc_candidates": [
+          {
+            "seed": "identity",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_minus",
+            "initialization": {
+              "tx": -20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": -0.75
+            },
+            "ecc_correlation": 0.9043861831215952,
+            "status": "VALIDATED",
+            "quality_score": 0.9138229393453949,
+            "structural_score": 0.8716840744018555,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -9.87606430053711,
+              "translation_y_px": 0.623870849609375,
+              "rotation_deg": -0.38902555000607536,
+              "scale_x": 0.9988621045501256,
+              "scale_y": 0.9964177389144093,
+              "shear": 0.002474741320187991
+            },
+            "message": "structural_score=0.8717; within transform limits"
+          },
+          {
+            "seed": "tx_plus_rot_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus_rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": -0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          }
+        ],
+        "selected_seed": "rot_minus"
+      }
+    },
+    {
+      "page": "T1_page_007.png",
+      "status": "PASS",
+      "method": "ecc_multistart",
+      "quality_score": 0.9532097467902432,
+      "ecc_correlation": 0.9510391069484794,
+      "translation_x_px": -7.096405029296875,
+      "translation_y_px": 6.045501708984375,
+      "rotation_deg": -0.4787575185165808,
+      "scale_x": 0.9987125959042981,
+      "scale_y": 0.9962173179585995,
+      "shear": 0.003119692638470685,
+      "inliers": null,
+      "inlier_ratio": null,
+      "message": "Multi-start ECC accepted seed=rot_minus; quality=0.9532; ecc=0.9510.",
+      "details": {
+        "ecc_candidates": [
+          {
+            "seed": "identity",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "ecc_correlation": 0.9510390152128776,
+            "status": "VALIDATED",
+            "quality_score": 0.9532080821906097,
+            "structural_score": 0.9165384769439697,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -7.0964202880859375,
+              "translation_y_px": 6.045440673828125,
+              "rotation_deg": -0.47875668852740827,
+              "scale_x": 0.9987126553901329,
+              "scale_y": 0.9962173179171487,
+              "shear": 0.0031196860986499697
+            },
+            "message": "structural_score=0.9165; within transform limits"
+          },
+          {
+            "seed": "tx_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "tx_minus",
+            "initialization": {
+              "tx": -20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.0
+            },
+            "ecc_correlation": 0.7196216312517618,
+            "status": "VALIDATED",
+            "quality_score": 0.7585629959135181,
+            "structural_score": 0.6988523602485657,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -50.915000915527344,
+              "translation_y_px": 6.4150390625,
+              "rotation_deg": -0.4712817325544084,
+              "scale_x": 1.00175753513189,
+              "scale_y": 0.9962652499167165,
+              "shear": 0.005049555688780194
+            },
+            "message": "structural_score=0.6989; within transform limits"
+          },
+          {
+            "seed": "ty_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 20.0,
+              "rotation_deg": 0.0
+            },
+            "ecc_correlation": 0.9404008022140181,
+            "status": "REJECTED",
+            "quality_score": 0.6582805615498126,
+            "structural_score": -1.0,
+            "within_limits": false,
+            "limit_reason": "translation_y exceeds 80.0px",
+            "transform": {
+              "translation_x_px": -7.883823394775391,
+              "translation_y_px": 85.16958618164062,
+              "rotation_deg": -0.4802054601341573,
+              "scale_x": 0.9989560622199198,
+              "scale_y": 0.9961412891722546,
+              "shear": 0.0030043967684633883
+            },
+            "message": "transform rejected: translation_y exceeds 80.0px"
+          },
+          {
+            "seed": "ty_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": 0.0
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_plus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": 0.0,
+              "rotation_deg": -0.75
+            },
+            "ecc_correlation": 0.9510391069484794,
+            "status": "VALIDATED",
+            "quality_score": 0.9532097467902432,
+            "structural_score": 0.9165491461753845,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -7.096405029296875,
+              "translation_y_px": 6.045501708984375,
+              "rotation_deg": -0.4787575185165808,
+              "scale_x": 0.9987125959042981,
+              "scale_y": 0.9962173179585995,
+              "shear": 0.003119692638470685
+            },
+            "message": "structural_score=0.9165; within transform limits"
+          },
+          {
+            "seed": "tx_plus_rot_plus",
+            "initialization": {
+              "tx": 20.0,
+              "ty": 0.0,
+              "rotation_deg": 0.75
+            },
+            "status": "ECC_FAILED",
+            "message": "OpenCV(5.0.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\video\\src\\ecc.cpp:597: error: (-7:Iterations do not converge) The algorithm stopped before its convergence. The correlation is going to be minimized. Images may be uncorrelated or non-overlapped in function 'cv::findTransformECCWithMask'\n"
+          },
+          {
+            "seed": "ty_minus_rot_minus",
+            "initialization": {
+              "tx": 0.0,
+              "ty": -20.0,
+              "rotation_deg": -0.75
+            },
+            "ecc_correlation": 0.9472083839102678,
+            "status": "VALIDATED",
+            "quality_score": 0.9453146611280108,
+            "structural_score": 0.8817919492721558,
+            "within_limits": true,
+            "limit_reason": "within transform limits",
+            "transform": {
+              "translation_x_px": -6.311614990234375,
+              "translation_y_px": -72.86846923828125,
+              "rotation_deg": -0.47588646531661755,
+              "scale_x": 0.9984782822854709,
+              "scale_y": 0.9960922940943645,
+              "shear": 0.00321471277752364
+            },
+            "message": "structural_score=0.8818; within transform limits"
+          }
+        ],
+        "selected_seed": "rot_minus"
+      }
+    }
+  ],
+  "artifacts": {
+    "aligned_dir": "D:\\production_ocr\\data\\preprocessed\\registration_debug\\aligned",
+    "overlay_dir": "D:\\production_ocr\\data\\preprocessed\\registration_debug\\overlays",
+    "contact_sheet": "D:\\production_ocr\\data\\preprocessed\\registration_debug\\contact_sheet.jpg"
+  }
+}

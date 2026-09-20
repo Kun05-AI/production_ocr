@@ -1,0 +1,13 @@
+{
+  "model_id": "Qwen/Qwen3-VL-4B-Instruct",
+  "gpu_memory": "5GiB",
+  "cpu_memory": "24GiB",
+  "dtype": "float16",
+  "quantization": "4bit-nf4-double-quant",
+  "max_new_tokens": 1200,
+  "input_dpi": 300,
+  "api_host": "127.0.0.1",
+  "api_port": 8000,
+  "review_threshold": 75,
+  "max_rows_per_page": 20
+}

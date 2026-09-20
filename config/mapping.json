@@ -1,0 +1,28 @@
+{
+  "production_mapping": {
+    "date": "Ngày",
+    "order_code": "Mã đơn hàng",
+    "drawing_code": "Mã bản vẽ",
+    "revision": "Rev",
+    "start_time": "Bắt đầu",
+    "end_time": "Kết thúc",
+    "processed_qty": "SL xử lý",
+    "good_qty": "SL đạt",
+    "ng_qty": "SL chờ",
+    "note": "Ghi chú"
+  },
+  "optional_mapping": {
+    "employee": "Nhân viên"
+  },
+  "candidate_mappings_for_review": {
+    "work_code": "OperationCode",
+    "process_detail": "Ghi chú"
+  },
+  "unmapped_paper_fields": [
+    "stt",
+    "employee_id",
+    "group",
+    "target_time",
+    "total_time"
+  ]
+}

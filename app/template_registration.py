@@ -1,0 +1,1917 @@
+from __future__ import annotations
+
+import math
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any
+
+import cv2
+import numpy as np
+
+from .form_registry import FormProfile
+
+
+@dataclass
+class RegistrationResult:
+    page: str
+    status: str
+    method: str | None
+    quality_score: float | None
+    ecc_correlation: float | None
+    translation_x_px: float | None
+    translation_y_px: float | None
+    rotation_deg: float | None
+    scale_x: float | None
+    scale_y: float | None
+    shear: float | None
+    inliers: int | None = None
+    inlier_ratio: float | None = None
+    message: str | None = None
+    details: dict[str, Any] | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def _load_bgr(path: str | Path) -> np.ndarray:
+    image = cv2.imread(
+        str(path),
+        cv2.IMREAD_COLOR,
+    )
+
+    if image is None:
+        raise ValueError(
+            f"Cannot read image: {path}"
+        )
+
+    return image
+
+
+def _registration_roi(
+    cfg: dict[str, Any],
+    width: int,
+    height: int,
+) -> tuple[int, int, int, int]:
+    roi = cfg.get("registration", {}).get("roi")
+
+    if not isinstance(roi, list) or len(roi) != 4:
+        return 0, 0, width, height
+
+    x1, y1, x2, y2 = (
+        int(value)
+        for value in roi
+    )
+
+    x1 = max(
+        0,
+        min(x1, width - 1),
+    )
+
+    y1 = max(
+        0,
+        min(y1, height - 1),
+    )
+
+    x2 = max(
+        x1 + 1,
+        min(x2, width),
+    )
+
+    y2 = max(
+        y1 + 1,
+        min(y2, height),
+    )
+
+    return x1, y1, x2, y2
+
+
+def _prepare_structural_image(
+    image: np.ndarray,
+) -> np.ndarray:
+    """
+    Build a structural representation for alignment.
+
+    The long printed table lines receive stronger influence than
+    small handwriting strokes. This reduces sensitivity to the fact
+    that each page contains different handwritten content.
+    """
+    gray = cv2.cvtColor(
+        image,
+        cv2.COLOR_BGR2GRAY,
+    )
+
+    gray = cv2.GaussianBlur(
+        gray,
+        (5, 5),
+        0,
+    )
+
+    clahe = cv2.createCLAHE(
+        clipLimit=2.0,
+        tileGridSize=(8, 8),
+    )
+
+    gray = clahe.apply(gray)
+
+    binary = cv2.adaptiveThreshold(
+        gray,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY_INV,
+        31,
+        9,
+    )
+
+    horizontal_kernel = cv2.getStructuringElement(
+        cv2.MORPH_RECT,
+        (80, 1),
+    )
+
+    vertical_kernel = cv2.getStructuringElement(
+        cv2.MORPH_RECT,
+        (1, 80),
+    )
+
+    horizontal = cv2.morphologyEx(
+        binary,
+        cv2.MORPH_OPEN,
+        horizontal_kernel,
+    )
+
+    vertical = cv2.morphologyEx(
+        binary,
+        cv2.MORPH_OPEN,
+        vertical_kernel,
+    )
+
+    line_structure = cv2.bitwise_or(
+        horizontal,
+        vertical,
+    )
+
+    edges = cv2.Canny(
+        gray,
+        50,
+        150,
+    )
+
+    edges = cv2.dilate(
+        edges,
+        np.ones(
+            (2, 2),
+            np.uint8,
+        ),
+        iterations=1,
+    )
+
+    structural = np.maximum(
+        line_structure,
+        (edges * 0.45).astype(np.uint8),
+    )
+
+    structural = cv2.GaussianBlur(
+        structural,
+        (3, 3),
+        0,
+    )
+
+    structural = structural.astype(
+        np.float32
+    )
+
+    mean, std = cv2.meanStdDev(
+        structural
+    )
+
+    mean_value = float(
+        mean[0, 0]
+    )
+
+    std_value = float(
+        std[0, 0]
+    )
+
+    if std_value > 1e-6:
+        structural = (
+            structural - mean_value
+        ) / std_value
+
+    return structural
+
+
+def _prepare_gray_for_features(
+    image: np.ndarray,
+) -> np.ndarray:
+    gray = cv2.cvtColor(
+        image,
+        cv2.COLOR_BGR2GRAY,
+    )
+
+    clahe = cv2.createCLAHE(
+        clipLimit=2.0,
+        tileGridSize=(8, 8),
+    )
+
+    gray = clahe.apply(gray)
+
+    return gray
+
+
+def _resize_keep_scale(
+    image: np.ndarray,
+    max_dim: int,
+) -> tuple[np.ndarray, float]:
+    height, width = image.shape[:2]
+
+    scale = min(
+        1.0,
+        max_dim / max(
+            height,
+            width,
+        ),
+    )
+
+    if scale >= 0.999:
+        return image, 1.0
+
+    resized = cv2.resize(
+        image,
+        (
+            max(
+                1,
+                int(
+                    round(
+                        width * scale
+                    )
+                ),
+            ),
+            max(
+                1,
+                int(
+                    round(
+                        height * scale
+                    )
+                ),
+            ),
+        ),
+        interpolation=cv2.INTER_AREA,
+    )
+
+    return resized, scale
+
+
+def _small_to_full_roi_matrix(
+    small_matrix: np.ndarray,
+    scale: float,
+) -> np.ndarray:
+    matrix = (
+        small_matrix
+        .astype(np.float64)
+        .copy()
+    )
+
+    matrix[:, 2] /= scale
+
+    return matrix.astype(
+        np.float32
+    )
+
+
+def _roi_to_global_matrix(
+    roi_matrix: np.ndarray,
+    roi_x1: int,
+    roi_y1: int,
+) -> np.ndarray:
+    a00, a01, tx = roi_matrix[0]
+    a10, a11, ty = roi_matrix[1]
+
+    global_tx = (
+        tx
+        + roi_x1
+        - (
+            a00 * roi_x1
+            + a01 * roi_y1
+        )
+    )
+
+    global_ty = (
+        ty
+        + roi_y1
+        - (
+            a10 * roi_x1
+            + a11 * roi_y1
+        )
+    )
+
+    return np.array(
+        [
+            [
+                a00,
+                a01,
+                global_tx,
+            ],
+            [
+                a10,
+                a11,
+                global_ty,
+            ],
+        ],
+        dtype=np.float32,
+    )
+
+
+def _global_to_roi_matrix(
+    global_matrix: np.ndarray,
+    roi_x1: int,
+    roi_y1: int,
+) -> np.ndarray:
+    a00, a01, global_tx = (
+        global_matrix[0]
+    )
+
+    a10, a11, global_ty = (
+        global_matrix[1]
+    )
+
+    roi_tx = (
+        global_tx
+        - roi_x1
+        + (
+            a00 * roi_x1
+            + a01 * roi_y1
+        )
+    )
+
+    roi_ty = (
+        global_ty
+        - roi_y1
+        + (
+            a10 * roi_x1
+            + a11 * roi_y1
+        )
+    )
+
+    return np.array(
+        [
+            [
+                a00,
+                a01,
+                roi_tx,
+            ],
+            [
+                a10,
+                a11,
+                roi_ty,
+            ],
+        ],
+        dtype=np.float32,
+    )
+
+
+def _roi_to_small_matrix(
+    roi_matrix: np.ndarray,
+    scale: float,
+) -> np.ndarray:
+    matrix = (
+        roi_matrix
+        .astype(np.float32)
+        .copy()
+    )
+
+    matrix[:, 2] *= scale
+
+    return matrix
+
+
+def _transform_metrics(
+    matrix: np.ndarray,
+) -> dict[str, float]:
+    a00, a01, tx = (
+        float(value)
+        for value in matrix[0]
+    )
+
+    a10, a11, ty = (
+        float(value)
+        for value in matrix[1]
+    )
+
+    rotation_deg = math.degrees(
+        math.atan2(
+            a10,
+            a00,
+        )
+    )
+
+    scale_x = math.sqrt(
+        a00 * a00
+        + a10 * a10
+    )
+
+    scale_y = math.sqrt(
+        a01 * a01
+        + a11 * a11
+    )
+
+    shear = abs(
+        a00 * a01
+        + a10 * a11
+    ) / max(
+        scale_x * scale_y,
+        1e-9,
+    )
+
+    return {
+        "translation_x_px": tx,
+        "translation_y_px": ty,
+        "rotation_deg": rotation_deg,
+        "scale_x": scale_x,
+        "scale_y": scale_y,
+        "shear": shear,
+    }
+
+
+def _within_limits(
+    metrics: dict[str, float],
+    registration_cfg: dict[str, Any],
+) -> tuple[bool, str]:
+    max_translation = float(
+        registration_cfg.get(
+            "max_translation_px",
+            80,
+        )
+    )
+
+    max_rotation = float(
+        registration_cfg.get(
+            "max_rotation_deg",
+            2.5,
+        )
+    )
+
+    max_scale_deviation = float(
+        registration_cfg.get(
+            "max_scale_deviation",
+            0.03,
+        )
+    )
+
+    max_shear = float(
+        registration_cfg.get(
+            "max_shear",
+            0.03,
+        )
+    )
+
+    if (
+        abs(
+            metrics["translation_x_px"]
+        )
+        > max_translation
+    ):
+        return (
+            False,
+            f"translation_x exceeds "
+            f"{max_translation}px",
+        )
+
+    if (
+        abs(
+            metrics["translation_y_px"]
+        )
+        > max_translation
+    ):
+        return (
+            False,
+            f"translation_y exceeds "
+            f"{max_translation}px",
+        )
+
+    if (
+        abs(
+            metrics["rotation_deg"]
+        )
+        > max_rotation
+    ):
+        return (
+            False,
+            f"rotation exceeds "
+            f"{max_rotation}°",
+        )
+
+    if (
+        abs(
+            metrics["scale_x"] - 1.0
+        )
+        > max_scale_deviation
+    ):
+        return (
+            False,
+            f"scale_x deviation exceeds "
+            f"{max_scale_deviation}",
+        )
+
+    if (
+        abs(
+            metrics["scale_y"] - 1.0
+        )
+        > max_scale_deviation
+    ):
+        return (
+            False,
+            f"scale_y deviation exceeds "
+            f"{max_scale_deviation}",
+        )
+
+    if (
+        metrics["shear"]
+        > max_shear
+    ):
+        return (
+            False,
+            f"shear exceeds "
+            f"{max_shear}",
+        )
+
+    return True, "within transform limits"
+
+
+def _warp_global(
+    image: np.ndarray,
+    matrix: np.ndarray,
+    page_width: int,
+    page_height: int,
+) -> np.ndarray:
+    return cv2.warpAffine(
+        image,
+        matrix,
+        (
+            page_width,
+            page_height,
+        ),
+        flags=(
+            cv2.INTER_LINEAR
+            | cv2.WARP_INVERSE_MAP
+        ),
+        borderMode=cv2.BORDER_CONSTANT,
+        borderValue=(
+            255,
+            255,
+            255,
+        ),
+    )
+
+
+def _structural_correlation(
+    reference: np.ndarray,
+    aligned: np.ndarray,
+) -> float:
+    ref = reference.astype(
+        np.float32
+    )
+
+    cur = aligned.astype(
+        np.float32
+    )
+
+    ref = ref - ref.mean()
+    cur = cur - cur.mean()
+
+    denominator = float(
+        np.linalg.norm(ref)
+        * np.linalg.norm(cur)
+    )
+
+    if denominator <= 1e-9:
+        return 0.0
+
+    return float(
+        np.sum(
+            ref * cur
+        ) / denominator
+    )
+
+
+def _run_ecc(
+    template_small: np.ndarray,
+    input_small: np.ndarray,
+    initial_matrix: np.ndarray,
+    iterations: int,
+    epsilon: float,
+) -> tuple[
+    float,
+    np.ndarray,
+]:
+    criteria = (
+        cv2.TERM_CRITERIA_EPS
+        | cv2.TERM_CRITERIA_COUNT,
+        iterations,
+        epsilon,
+    )
+
+    correlation, warp = (
+        cv2.findTransformECC(
+            template_small,
+            input_small,
+            initial_matrix.astype(
+                np.float32
+            ),
+            cv2.MOTION_AFFINE,
+            criteria,
+            None,
+            5,
+        )
+    )
+
+    return (
+        float(correlation),
+        warp.astype(
+            np.float32
+        ),
+    )
+
+
+def _sift_ransac(
+    reference_gray: np.ndarray,
+    input_gray: np.ndarray,
+    cfg: dict[str, Any],
+) -> tuple[
+    np.ndarray | None,
+    int,
+    float,
+    str,
+]:
+    if not hasattr(
+        cv2,
+        "SIFT_create",
+    ):
+        return (
+            None,
+            0,
+            0.0,
+            "SIFT is unavailable.",
+        )
+
+    sift = cv2.SIFT_create(
+        nfeatures=int(
+            cfg.get(
+                "sift_nfeatures",
+                1500,
+            )
+        )
+    )
+
+    key_ref, desc_ref = (
+        sift.detectAndCompute(
+            reference_gray,
+            None,
+        )
+    )
+
+    key_in, desc_in = (
+        sift.detectAndCompute(
+            input_gray,
+            None,
+        )
+    )
+
+    if (
+        desc_ref is None
+        or desc_in is None
+    ):
+        return (
+            None,
+            0,
+            0.0,
+            "SIFT produced no descriptors.",
+        )
+
+    if (
+        len(key_ref) < 6
+        or len(key_in) < 6
+    ):
+        return (
+            None,
+            0,
+            0.0,
+            "Too few SIFT keypoints.",
+        )
+
+    matcher = cv2.BFMatcher(
+        cv2.NORM_L2
+    )
+
+    knn = matcher.knnMatch(
+        desc_in,
+        desc_ref,
+        k=2,
+    )
+
+    ratio = float(
+        cfg.get(
+            "sift_ratio_threshold",
+            0.75,
+        )
+    )
+
+    good = []
+
+    for pair in knn:
+        if len(pair) != 2:
+            continue
+
+        first, second = pair
+
+        if (
+            first.distance
+            < ratio * second.distance
+        ):
+            good.append(first)
+
+    if len(good) < 6:
+        return (
+            None,
+            0,
+            0.0,
+            f"Too few good matches: {len(good)}.",
+        )
+
+    src = np.float32(
+        [
+            key_in[m.queryIdx].pt
+            for m in good
+        ]
+    )
+
+    dst = np.float32(
+        [
+            key_ref[m.trainIdx].pt
+            for m in good
+        ]
+    )
+
+    matrix, mask = (
+        cv2.estimateAffine2D(
+            src,
+            dst,
+            method=cv2.RANSAC,
+            ransacReprojThreshold=float(
+                cfg.get(
+                    "sift_ransac_reproj_threshold",
+                    3.0,
+                )
+            ),
+            maxIters=3000,
+            confidence=0.995,
+            refineIters=20,
+        )
+    )
+
+    if (
+        matrix is None
+        or mask is None
+    ):
+        return (
+            None,
+            0,
+            0.0,
+            "RANSAC could not estimate affine transform.",
+        )
+
+    inliers = int(
+        mask.ravel().sum()
+    )
+
+    inlier_ratio = (
+        inliers
+        / max(
+            len(good),
+            1,
+        )
+    )
+
+    min_inliers = int(
+        cfg.get(
+            "sift_min_inliers",
+            12,
+        )
+    )
+
+    min_ratio = float(
+        cfg.get(
+            "sift_min_inlier_ratio",
+            0.25,
+        )
+    )
+
+    if inliers < min_inliers:
+        return (
+            None,
+            inliers,
+            float(inlier_ratio),
+            f"RANSAC inliers {inliers} "
+            f"< {min_inliers}.",
+        )
+
+    if inlier_ratio < min_ratio:
+        return (
+            None,
+            inliers,
+            float(inlier_ratio),
+            f"RANSAC inlier ratio "
+            f"{inlier_ratio:.3f} "
+            f"< {min_ratio:.3f}.",
+        )
+
+    return (
+        matrix.astype(
+            np.float32
+        ),
+        inliers,
+        float(inlier_ratio),
+        (
+            f"SIFT/RANSAC produced "
+            f"{inliers}/{len(good)} "
+            f"inliers."
+        ),
+    )
+
+
+class TemplateRegistrar:
+    """
+    Robust registration for a versioned form.
+
+    Strategy:
+
+    1. Exact-reference fast path.
+    2. Multi-start ECC using several small, physically plausible
+       initial transforms.
+    3. SIFT/RANSAC fallback for difficult pages.
+    4. ECC refinement from the accepted SIFT transform.
+    5. Reject mathematically valid but physically implausible transforms.
+
+    The multi-start ECC stage is intentionally conservative: an ECC
+    candidate is useful only when its correlation/quality is acceptable
+    and its transform stays inside the physical limits from form.json.
+    """
+
+    def __init__(
+        self,
+        profile: FormProfile,
+    ) -> None:
+        self.profile = profile
+
+        cfg = profile.cfg
+
+        self.page_width = int(
+            cfg["page"]["width"]
+        )
+
+        self.page_height = int(
+            cfg["page"]["height"]
+        )
+
+        self.registration_cfg = (
+            cfg["registration"]
+        )
+
+        self.reference = _load_bgr(
+            profile.reference_image
+        )
+
+        ref_h, ref_w = (
+            self.reference.shape[:2]
+        )
+
+        if (
+            ref_w,
+            ref_h,
+        ) != (
+            self.page_width,
+            self.page_height,
+        ):
+            raise ValueError(
+                "Reference size does not "
+                "match form profile: "
+                f"expected "
+                f"{self.page_width}x"
+                f"{self.page_height}, "
+                f"got "
+                f"{ref_w}x"
+                f"{ref_h}."
+            )
+
+        x1, y1, x2, y2 = (
+            _registration_roi(
+                cfg,
+                ref_w,
+                ref_h,
+            )
+        )
+
+        self.roi = (
+            x1,
+            y1,
+            x2,
+            y2,
+        )
+
+        ref_roi = self.reference[
+            y1:y2,
+            x1:x2,
+        ]
+
+        self.reference_gray = (
+            _prepare_gray_for_features(
+                ref_roi
+            )
+        )
+
+        self.reference_structural = (
+            _prepare_structural_image(
+                ref_roi
+            )
+        )
+
+        max_dim = int(
+            self.registration_cfg.get(
+                "max_feature_dimension",
+                1600,
+            )
+        )
+
+        (
+            self.reference_structural_small,
+            self.feature_scale,
+        ) = _resize_keep_scale(
+            self.reference_structural,
+            max_dim,
+        )
+
+    def _make_result(
+        self,
+        page: str,
+        status: str,
+        method: str | None,
+        quality_score: float | None,
+        ecc_correlation: float | None,
+        matrix: np.ndarray | None,
+        message: str,
+        inliers: int | None = None,
+        inlier_ratio: float | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> RegistrationResult:
+        if matrix is None:
+            return RegistrationResult(
+                page=page,
+                status=status,
+                method=method,
+                quality_score=quality_score,
+                ecc_correlation=ecc_correlation,
+                translation_x_px=None,
+                translation_y_px=None,
+                rotation_deg=None,
+                scale_x=None,
+                scale_y=None,
+                shear=None,
+                inliers=inliers,
+                inlier_ratio=inlier_ratio,
+                message=message,
+                details=details,
+            )
+
+        metrics = _transform_metrics(
+            matrix
+        )
+
+        return RegistrationResult(
+            page=page,
+            status=status,
+            method=method,
+            quality_score=quality_score,
+            ecc_correlation=ecc_correlation,
+            **metrics,
+            inliers=inliers,
+            inlier_ratio=inlier_ratio,
+            message=message,
+            details=details,
+        )
+
+    def _ecc_initializations(self) -> list[dict[str, float | str]]:
+        """
+        Build a small deterministic set of ECC initializations.
+
+        The seed values are intentionally small relative to the physical
+        limits. They exist to move ECC away from the identity solution
+        without allowing the optimizer to start from implausible geometry.
+        """
+        tx = float(
+            self.registration_cfg.get(
+                "ecc_initial_translation_px",
+                20.0,
+            )
+        )
+        angle = float(
+            self.registration_cfg.get(
+                "ecc_initial_rotation_deg",
+                0.75,
+            )
+        )
+
+        seeds: list[dict[str, float | str]] = [
+            {
+                "name": "identity",
+                "tx": 0.0,
+                "ty": 0.0,
+                "rotation_deg": 0.0,
+            },
+            {
+                "name": "tx_plus",
+                "tx": tx,
+                "ty": 0.0,
+                "rotation_deg": 0.0,
+            },
+            {
+                "name": "tx_minus",
+                "tx": -tx,
+                "ty": 0.0,
+                "rotation_deg": 0.0,
+            },
+            {
+                "name": "ty_plus",
+                "tx": 0.0,
+                "ty": tx,
+                "rotation_deg": 0.0,
+            },
+            {
+                "name": "ty_minus",
+                "tx": 0.0,
+                "ty": -tx,
+                "rotation_deg": 0.0,
+            },
+            {
+                "name": "rot_plus",
+                "tx": 0.0,
+                "ty": 0.0,
+                "rotation_deg": angle,
+            },
+            {
+                "name": "rot_minus",
+                "tx": 0.0,
+                "ty": 0.0,
+                "rotation_deg": -angle,
+            },
+            {
+                "name": "tx_plus_rot_plus",
+                "tx": tx,
+                "ty": 0.0,
+                "rotation_deg": angle,
+            },
+            {
+                "name": "ty_minus_rot_minus",
+                "tx": 0.0,
+                "ty": -tx,
+                "rotation_deg": -angle,
+            },
+        ]
+
+        return seeds
+
+    @staticmethod
+    def _seed_matrix(
+        seed: dict[str, float | str],
+        width: int,
+        height: int,
+    ) -> np.ndarray:
+        """Create an affine seed around the ROI image center."""
+        angle = float(seed["rotation_deg"])
+        tx = float(seed["tx"])
+        ty = float(seed["ty"])
+
+        if abs(angle) <= 1e-12:
+            matrix = np.array(
+                [
+                    [1.0, 0.0, tx],
+                    [0.0, 1.0, ty],
+                ],
+                dtype=np.float32,
+            )
+            return matrix
+
+        center = (
+            (width - 1) / 2.0,
+            (height - 1) / 2.0,
+        )
+        matrix = cv2.getRotationMatrix2D(
+            center,
+            angle,
+            1.0,
+        ).astype(np.float32)
+        matrix[0, 2] += tx
+        matrix[1, 2] += ty
+        return matrix
+
+    def _candidate_quality(
+        self,
+        correlation: float,
+        structural_score: float,
+    ) -> float:
+        """Combine ECC and post-warp structural agreement."""
+        return float(
+            0.70
+            * max(
+                0.0,
+                min(1.0, correlation),
+            )
+            + 0.30
+            * max(
+                0.0,
+                min(
+                    1.0,
+                    (structural_score + 1.0) / 2.0,
+                ),
+            )
+        )
+
+    def _evaluate_ecc_candidate(
+        self,
+        image: np.ndarray,
+        input_structural: np.ndarray,
+        input_structural_small: np.ndarray,
+        small_matrix: np.ndarray,
+        scale: float,
+    ) -> dict[str, Any]:
+        """Convert, validate, warp, and score one ECC candidate."""
+        x1, y1, _, _ = self.roi
+
+        roi_matrix = _small_to_full_roi_matrix(
+            small_matrix,
+            scale,
+        )
+        global_matrix = _roi_to_global_matrix(
+            roi_matrix,
+            x1,
+            y1,
+        )
+
+        metrics = _transform_metrics(
+            global_matrix
+        )
+        within, reason = _within_limits(
+            metrics,
+            self.registration_cfg,
+        )
+
+        candidate: dict[str, Any] = {
+            "status": "REJECTED",
+            "matrix": global_matrix,
+            "metrics": metrics,
+            "within_limits": within,
+            "limit_reason": reason,
+        }
+
+        if not within:
+            candidate["message"] = (
+                f"transform rejected: {reason}"
+            )
+            return candidate
+
+        aligned = _warp_global(
+            image,
+            global_matrix,
+            self.page_width,
+            self.page_height,
+        )
+
+        _, _, x2, y2 = self.roi
+        aligned_structural = _prepare_structural_image(
+            aligned[y1:y2, x1:x2]
+        )
+        structural_score = _structural_correlation(
+            self.reference_structural,
+            aligned_structural,
+        )
+        quality = self._candidate_quality(
+            float(candidate.get("ecc_correlation", 0.0)),
+            structural_score,
+        )
+
+        # The correlation value is attached by _run_multi_start_ecc.
+        candidate["structural_score"] = float(
+            structural_score
+        )
+        candidate["aligned"] = aligned
+        candidate["status"] = "VALIDATED"
+        candidate["message"] = (
+            f"structural_score={structural_score:.4f}; "
+            f"{reason}"
+        )
+        return candidate
+
+    def _run_multi_start_ecc(
+        self,
+        image: np.ndarray,
+        input_structural: np.ndarray,
+        input_structural_small: np.ndarray,
+        scale: float,
+    ) -> tuple[
+        dict[str, Any] | None,
+        list[dict[str, Any]],
+        str,
+    ]:
+        """
+        Run ECC from multiple deterministic seeds and choose the best
+        physically valid candidate that satisfies the acceptance thresholds.
+        """
+        ecc_iterations = int(
+            self.registration_cfg.get(
+                "ecc_iterations",
+                150,
+            )
+        )
+        ecc_epsilon = float(
+            self.registration_cfg.get(
+                "ecc_epsilon",
+                1e-6,
+            )
+        )
+        min_ecc = float(
+            self.registration_cfg.get(
+                "min_ecc_correlation",
+                0.60,
+            )
+        )
+        min_quality = float(
+            self.registration_cfg.get(
+                "min_structural_quality",
+                0.35,
+            )
+        )
+
+        roi_h, roi_w = input_structural.shape[:2]
+        candidate_records: list[dict[str, Any]] = []
+        accepted: list[dict[str, Any]] = []
+
+        for seed in self._ecc_initializations():
+            seed_name = str(seed["name"])
+            seed_matrix = self._seed_matrix(
+                seed,
+                roi_w,
+                roi_h,
+            )
+
+            record: dict[str, Any] = {
+                "seed": seed_name,
+                "initialization": {
+                    "tx": float(seed["tx"]),
+                    "ty": float(seed["ty"]),
+                    "rotation_deg": float(
+                        seed["rotation_deg"]
+                    ),
+                },
+            }
+
+            try:
+                correlation, small_matrix = _run_ecc(
+                    self.reference_structural_small,
+                    input_structural_small,
+                    seed_matrix,
+                    ecc_iterations,
+                    ecc_epsilon,
+                )
+            except cv2.error as exc:
+                record.update(
+                    {
+                        "status": "ECC_FAILED",
+                        "message": str(exc),
+                    }
+                )
+                candidate_records.append(record)
+                continue
+
+            record["ecc_correlation"] = float(
+                correlation
+            )
+
+            try:
+                candidate = self._evaluate_ecc_candidate(
+                    image,
+                    input_structural,
+                    input_structural_small,
+                    small_matrix,
+                    scale,
+                )
+            except cv2.error as exc:
+                record.update(
+                    {
+                        "status": "EVALUATION_FAILED",
+                        "message": str(exc),
+                    }
+                )
+                candidate_records.append(record)
+                continue
+
+            # Candidate scoring depends on the ECC correlation produced above.
+            candidate["ecc_correlation"] = float(
+                correlation
+            )
+            quality = self._candidate_quality(
+                float(correlation),
+                float(candidate.get("structural_score", -1.0)),
+            )
+            candidate["quality_score"] = float(
+                quality
+            )
+
+            if (
+                candidate["status"] == "VALIDATED"
+                and (
+                    correlation < min_ecc
+                    or quality < min_quality
+                )
+            ):
+                candidate["status"] = "QUALITY_REJECTED"
+                candidate["message"] = (
+                    f"corr={correlation:.4f}; "
+                    f"quality={quality:.4f}; "
+                    f"required corr>={min_ecc:.4f}, "
+                    f"quality>={min_quality:.4f}."
+                )
+
+            record.update(
+                {
+                    "status": candidate["status"],
+                    "quality_score": float(
+                        quality
+                    ),
+                    "structural_score": float(
+                        candidate.get(
+                            "structural_score",
+                            -1.0,
+                        )
+                    ),
+                    "within_limits": bool(
+                        candidate["within_limits"]
+                    ),
+                    "limit_reason": candidate[
+                        "limit_reason"
+                    ],
+                    "transform": candidate[
+                        "metrics"
+                    ],
+                    "message": candidate[
+                        "message"
+                    ],
+                }
+            )
+            candidate_records.append(record)
+
+            if (
+                candidate["status"] == "VALIDATED"
+                and correlation >= min_ecc
+                and quality >= min_quality
+            ):
+                candidate["seed"] = seed_name
+                accepted.append(candidate)
+
+        if not accepted:
+            return (
+                None,
+                candidate_records,
+                (
+                    "Multi-start ECC produced no accepted candidate. "
+                    f"seeds={len(candidate_records)}."
+                ),
+            )
+
+        accepted.sort(
+            key=lambda item: (
+                float(item["quality_score"]),
+                float(item["ecc_correlation"]),
+            ),
+            reverse=True,
+        )
+        best = accepted[0]
+        return (
+            best,
+            candidate_records,
+            (
+                f"Multi-start ECC accepted seed={best['seed']}; "
+                f"quality={best['quality_score']:.4f}; "
+                f"ecc={best['ecc_correlation']:.4f}."
+            ),
+        )
+
+    def register(
+        self,
+        image_path: str | Path,
+    ) -> tuple[
+        np.ndarray,
+        RegistrationResult,
+    ]:
+        image_path = Path(
+            image_path
+        )
+
+        image = _load_bgr(
+            image_path
+        )
+
+        height, width = (
+            image.shape[:2]
+        )
+
+        if (
+            width,
+            height,
+        ) != (
+            self.page_width,
+            self.page_height,
+        ):
+            result = self._make_result(
+                page=image_path.name,
+                status="REVIEW",
+                method=None,
+                quality_score=None,
+                ecc_correlation=None,
+                matrix=None,
+                message=(
+                    f"Unexpected page size "
+                    f"{width}x{height}; "
+                    f"expected "
+                    f"{self.page_width}x"
+                    f"{self.page_height}."
+                ),
+            )
+            return image, result
+
+        if np.array_equal(
+            image,
+            self.reference,
+        ):
+            result = self._make_result(
+                page=image_path.name,
+                status="PASS",
+                method="identity_reference",
+                quality_score=1.0,
+                ecc_correlation=1.0,
+                matrix=np.eye(
+                    2,
+                    3,
+                    dtype=np.float32,
+                ),
+                message=(
+                    "Input page is identical "
+                    "to the reference image."
+                ),
+                details={
+                    "ecc_candidates": [],
+                    "selected_seed": "identity_reference",
+                },
+            )
+            return (
+                image.copy(),
+                result,
+            )
+
+        x1, y1, x2, y2 = self.roi
+        input_roi = image[
+            y1:y2,
+            x1:x2,
+        ]
+
+        input_gray = (
+            _prepare_gray_for_features(
+                input_roi
+            )
+        )
+
+        input_structural = (
+            _prepare_structural_image(
+                input_roi
+            )
+        )
+
+        (
+            input_structural_small,
+            scale,
+        ) = _resize_keep_scale(
+            input_structural,
+            int(
+                self.registration_cfg.get(
+                    "max_feature_dimension",
+                    1600,
+                )
+            ),
+        )
+
+        # -------------------------------------------------
+        # 1. MULTI-START ECC
+        # -------------------------------------------------
+        (
+            ecc_best,
+            ecc_records,
+            ecc_message,
+        ) = self._run_multi_start_ecc(
+            image,
+            input_structural,
+            input_structural_small,
+            scale,
+        )
+
+        if ecc_best is not None:
+            result = self._make_result(
+                page=image_path.name,
+                status="PASS",
+                method="ecc_multistart",
+                quality_score=float(
+                    ecc_best["quality_score"]
+                ),
+                ecc_correlation=float(
+                    ecc_best["ecc_correlation"]
+                ),
+                matrix=ecc_best["matrix"],
+                message=ecc_message,
+                details={
+                    "ecc_candidates": ecc_records,
+                    "selected_seed": ecc_best["seed"],
+                },
+            )
+            return (
+                ecc_best["aligned"],
+                result,
+            )
+
+        # -------------------------------------------------
+        # 2. SIFT / RANSAC FALLBACK
+        # -------------------------------------------------
+        sift_matrix, inliers, inlier_ratio, sift_message = (
+            _sift_ransac(
+                self.reference_gray,
+                input_gray,
+                self.registration_cfg,
+            )
+        )
+
+        fallback_details: dict[str, Any] = {
+            "ecc_candidates": ecc_records,
+            "selected_seed": None,
+        }
+
+        if sift_matrix is not None:
+            global_matrix = (
+                _roi_to_global_matrix(
+                    sift_matrix,
+                    x1,
+                    y1,
+                )
+            )
+
+            metrics = _transform_metrics(
+                global_matrix
+            )
+
+            within, reason = (
+                _within_limits(
+                    metrics,
+                    self.registration_cfg,
+                )
+            )
+
+            if within:
+                aligned = _warp_global(
+                    image,
+                    global_matrix,
+                    self.page_width,
+                    self.page_height,
+                )
+
+                aligned_structural = (
+                    _prepare_structural_image(
+                        aligned[
+                            y1:y2,
+                            x1:x2,
+                        ]
+                    )
+                )
+
+                structural_score = (
+                    _structural_correlation(
+                        self.reference_structural,
+                        aligned_structural,
+                    )
+                )
+
+                quality = max(
+                    0.0,
+                    min(
+                        1.0,
+                        (
+                            structural_score
+                            + 1.0
+                        )
+                        / 2.0,
+                    ),
+                )
+
+                min_quality = float(
+                    self.registration_cfg.get(
+                        "min_structural_quality",
+                        0.35,
+                    )
+                )
+
+                fallback_details.update(
+                    {
+                        "sift_structural_score": float(
+                            structural_score
+                        ),
+                        "sift_quality_score": float(
+                            quality
+                        ),
+                        "sift_within_limits": True,
+                    }
+                )
+
+                if quality >= min_quality:
+                    # -------------------------------------
+                    # 3. ECC REFINE FROM SIFT
+                    # -------------------------------------
+                    try:
+                        roi_matrix = (
+                            _global_to_roi_matrix(
+                                global_matrix,
+                                x1,
+                                y1,
+                            )
+                        )
+
+                        initial_small = (
+                            _roi_to_small_matrix(
+                                roi_matrix,
+                                scale,
+                            )
+                        )
+
+                        refined_corr, refined_small = (
+                            _run_ecc(
+                                self.reference_structural_small,
+                                input_structural_small,
+                                initial_small,
+                                int(
+                                    self.registration_cfg.get(
+                                        "ecc_refine_iterations",
+                                        80,
+                                    )
+                                ),
+                                float(
+                                    self.registration_cfg.get(
+                                        "ecc_epsilon",
+                                        1e-6,
+                                    )
+                                ),
+                            )
+                        )
+
+                        refined_roi = (
+                            _small_to_full_roi_matrix(
+                                refined_small,
+                                scale,
+                            )
+                        )
+
+                        refined_global = (
+                            _roi_to_global_matrix(
+                                refined_roi,
+                                x1,
+                                y1,
+                            )
+                        )
+
+                        refined_metrics = (
+                            _transform_metrics(
+                                refined_global
+                            )
+                        )
+
+                        refined_within, refined_reason = (
+                            _within_limits(
+                                refined_metrics,
+                                self.registration_cfg,
+                            )
+                        )
+
+                        refined_aligned = (
+                            _warp_global(
+                                image,
+                                refined_global,
+                                self.page_width,
+                                self.page_height,
+                            )
+                        )
+
+                        refined_structural = (
+                            _prepare_structural_image(
+                                refined_aligned[
+                                    y1:y2,
+                                    x1:x2,
+                                ]
+                            )
+                        )
+
+                        refined_structural_score = (
+                            _structural_correlation(
+                                self.reference_structural,
+                                refined_structural,
+                            )
+                        )
+
+                        refined_quality = (
+                            self._candidate_quality(
+                                float(refined_corr),
+                                float(refined_structural_score),
+                            )
+                        )
+
+                        fallback_details.update(
+                            {
+                                "ecc_refined": True,
+                                "ecc_refined_correlation": float(
+                                    refined_corr
+                                ),
+                                "ecc_refined_quality": float(
+                                    refined_quality
+                                ),
+                                "ecc_refined_transform": refined_metrics,
+                            }
+                        )
+
+                        if (
+                            refined_within
+                            and refined_corr
+                            >= float(
+                                self.registration_cfg.get(
+                                    "min_ecc_correlation",
+                                    0.60,
+                                )
+                            )
+                            and refined_quality
+                            >= min_quality
+                        ):
+                            result = self._make_result(
+                                page=image_path.name,
+                                status="PASS",
+                                method="sift_ransac_ecc_refine",
+                                quality_score=float(
+                                    refined_quality
+                                ),
+                                ecc_correlation=float(
+                                    refined_corr
+                                ),
+                                matrix=refined_global,
+                                inliers=inliers,
+                                inlier_ratio=inlier_ratio,
+                                message=(
+                                    f"{ecc_message}; "
+                                    f"{sift_message}; "
+                                    f"ECC refine accepted. "
+                                    f"quality="
+                                    f"{refined_quality:.4f}; "
+                                    f"{refined_reason}"
+                                ),
+                                details=fallback_details,
+                            )
+
+                            return (
+                                refined_aligned,
+                                result,
+                            )
+
+                    except cv2.error as exc:
+                        fallback_details.update(
+                            {
+                                "ecc_refined": False,
+                                "ecc_refine_error": str(exc),
+                            }
+                        )
+
+                    # The SIFT transform itself remains eligible after
+                    # its geometry and structural quality checks pass.
+                    result = self._make_result(
+                        page=image_path.name,
+                        status="PASS",
+                        method="sift_ransac",
+                        quality_score=float(
+                            quality
+                        ),
+                        ecc_correlation=None,
+                        matrix=global_matrix,
+                        inliers=inliers,
+                        inlier_ratio=inlier_ratio,
+                        message=(
+                            f"{ecc_message}; "
+                            f"{sift_message}; "
+                            f"SIFT transform accepted. "
+                            f"quality={quality:.4f}; "
+                            f"{reason}"
+                        ),
+                        details=fallback_details,
+                    )
+
+                    return (
+                        aligned,
+                        result,
+                    )
+
+            fallback_details.update(
+                {
+                    "sift_within_limits": False,
+                    "sift_limit_reason": reason,
+                }
+            )
+
+            sift_rejected = (
+                f"{sift_message} "
+                f"SIFT transform rejected: "
+                f"{reason}"
+            )
+        else:
+            sift_rejected = sift_message
+
+        # -------------------------------------------------
+        # 4. FINAL REVIEW
+        # -------------------------------------------------
+        return image, self._make_result(
+            page=image_path.name,
+            status="REVIEW",
+            method="registration_failed",
+            quality_score=None,
+            ecc_correlation=None,
+            matrix=None,
+            inliers=inliers,
+            inlier_ratio=inlier_ratio,
+            message=(
+                f"{ecc_message}; "
+                f"{sift_rejected}"
+            ),
+            details=fallback_details,
+        )
+
+
+
+def create_alignment_overlay(
+    reference: np.ndarray,
+    aligned: np.ndarray,
+) -> np.ndarray:
+    ref_gray = cv2.cvtColor(
+        reference,
+        cv2.COLOR_BGR2GRAY,
+    )
+
+    aligned_gray = cv2.cvtColor(
+        aligned,
+        cv2.COLOR_BGR2GRAY,
+    )
+
+    ref_edges = cv2.Canny(
+        cv2.GaussianBlur(
+            ref_gray,
+            (5, 5),
+            0,
+        ),
+        50,
+        150,
+    )
+
+    aligned_edges = cv2.Canny(
+        cv2.GaussianBlur(
+            aligned_gray,
+            (5, 5),
+            0,
+        ),
+        50,
+        150,
+    )
+
+    canvas = np.full_like(
+        reference,
+        255,
+    )
+
+    canvas[
+        ref_edges > 0
+    ] = (
+        0,
+        180,
+        0,
+    )
+
+    canvas[
+        aligned_edges > 0
+    ] = (
+        0,
+        0,
+        220,
+    )
+
+    return canvas
