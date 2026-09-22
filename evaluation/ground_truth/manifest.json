@@ -1,0 +1,921 @@
+{
+  "schema_version": 1,
+  "purpose": "Production OCR Phase 2 Ground Truth inventory",
+  "form_profile": {
+    "form_id": "T1",
+    "version": "v1"
+  },
+  "source_root": "D:\\production_ocr\\gcck\\BÁO CÁO",
+  "summary": {
+    "members": 5,
+    "documents": 19,
+    "pages": 143
+  },
+  "documents": [
+    {
+      "member_id": "1207",
+      "member_name": "NGUYEN TRUONG NHAN",
+      "document_id": "T1",
+      "week_number": 1,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T1.pdf",
+      "page_count": 7,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T1\\T1_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T1\\T1_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T1\\T1_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T1\\T1_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T1\\T1_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T1\\T1_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T1\\T1_page_007.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1207",
+      "member_name": "NGUYEN TRUONG NHAN",
+      "document_id": "T2",
+      "week_number": 2,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T2.pdf",
+      "page_count": 5,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T2\\T2_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T2\\T2_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T2\\T2_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T2\\T2_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T2\\T2_page_005.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1207",
+      "member_name": "NGUYEN TRUONG NHAN",
+      "document_id": "T3",
+      "week_number": 3,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+      "page_count": 9,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T3\\T3_page_009.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1207",
+      "member_name": "NGUYEN TRUONG NHAN",
+      "document_id": "T4",
+      "week_number": 4,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+      "page_count": 10,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_009.png"
+        },
+        {
+          "page": 10,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1207. NGUYEN TRUONG NHAN\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1207\\T4\\T4_page_010.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1236",
+      "member_name": "BUI MINH HOANG",
+      "document_id": "T1",
+      "week_number": 1,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T1.pdf",
+      "page_count": 7,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T1\\T1_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T1\\T1_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T1\\T1_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T1\\T1_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T1\\T1_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T1\\T1_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T1\\T1_page_007.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1236",
+      "member_name": "BUI MINH HOANG",
+      "document_id": "T2",
+      "week_number": 2,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T2.pdf",
+      "page_count": 5,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T2\\T2_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T2\\T2_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T2\\T2_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T2\\T2_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T2\\T2_page_005.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1236",
+      "member_name": "BUI MINH HOANG",
+      "document_id": "T3",
+      "week_number": 3,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+      "page_count": 9,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T3\\T3_page_009.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1236",
+      "member_name": "BUI MINH HOANG",
+      "document_id": "T4",
+      "week_number": 4,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+      "page_count": 11,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_009.png"
+        },
+        {
+          "page": 10,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_010.png"
+        },
+        {
+          "page": 11,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1236. BUI MINH HOANG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1236\\T4\\T4_page_011.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1263",
+      "member_name": "NGUYEN HUU THUONG",
+      "document_id": "T1",
+      "week_number": 1,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T1.pdf",
+      "page_count": 5,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T1\\T1_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T1\\T1_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T1\\T1_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T1\\T1_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T1\\T1_page_005.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1263",
+      "member_name": "NGUYEN HUU THUONG",
+      "document_id": "T2",
+      "week_number": 2,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T2.pdf",
+      "page_count": 4,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T2\\T2_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T2\\T2_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T2\\T2_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T2\\T2_page_004.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1263",
+      "member_name": "NGUYEN HUU THUONG",
+      "document_id": "T3",
+      "week_number": 3,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+      "page_count": 10,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_009.png"
+        },
+        {
+          "page": 10,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T3\\T3_page_010.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1263",
+      "member_name": "NGUYEN HUU THUONG",
+      "document_id": "T4",
+      "week_number": 4,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+      "page_count": 13,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_009.png"
+        },
+        {
+          "page": 10,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_010.png"
+        },
+        {
+          "page": 11,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_011.png"
+        },
+        {
+          "page": 12,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_012.png"
+        },
+        {
+          "page": 13,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1263. NGUYEN HUU THUONG\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1263\\T4\\T4_page_013.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1570",
+      "member_name": "THACH SANG DO",
+      "document_id": "T1",
+      "week_number": 1,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T1.pdf",
+      "page_count": 3,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T1\\T1_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T1\\T1_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T1\\T1_page_003.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1570",
+      "member_name": "THACH SANG DO",
+      "document_id": "T2",
+      "week_number": 2,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T2.pdf",
+      "page_count": 2,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T2\\T2_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T2\\T2_page_002.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1570",
+      "member_name": "THACH SANG DO",
+      "document_id": "T3",
+      "week_number": 3,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T3.pdf",
+      "page_count": 4,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T3\\T3_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T3\\T3_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T3\\T3_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1570. THACH SANG DO\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1570\\T3\\T3_page_004.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1575",
+      "member_name": "DAO DUC THINH",
+      "document_id": "T1",
+      "week_number": 1,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T1.pdf",
+      "page_count": 7,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T1\\T1_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T1\\T1_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T1\\T1_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T1\\T1_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T1\\T1_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T1\\T1_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T1.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T1\\T1_page_007.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1575",
+      "member_name": "DAO DUC THINH",
+      "document_id": "T2",
+      "week_number": 2,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+      "page_count": 9,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T2.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T2\\T2_page_009.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1575",
+      "member_name": "DAO DUC THINH",
+      "document_id": "T3",
+      "week_number": 3,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+      "page_count": 10,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_009.png"
+        },
+        {
+          "page": 10,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T3.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T3\\T3_page_010.png"
+        }
+      ]
+    },
+    {
+      "member_id": "1575",
+      "member_name": "DAO DUC THINH",
+      "document_id": "T4",
+      "week_number": 4,
+      "pdf_path": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+      "page_count": 13,
+      "pages": [
+        {
+          "page": 1,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_001.png"
+        },
+        {
+          "page": 2,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_002.png"
+        },
+        {
+          "page": 3,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_003.png"
+        },
+        {
+          "page": 4,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_004.png"
+        },
+        {
+          "page": 5,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_005.png"
+        },
+        {
+          "page": 6,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_006.png"
+        },
+        {
+          "page": 7,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_007.png"
+        },
+        {
+          "page": 8,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_008.png"
+        },
+        {
+          "page": 9,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_009.png"
+        },
+        {
+          "page": 10,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_010.png"
+        },
+        {
+          "page": 11,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_011.png"
+        },
+        {
+          "page": 12,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_012.png"
+        },
+        {
+          "page": 13,
+          "source_pdf": "D:\\production_ocr\\gcck\\BÁO CÁO\\1575. DAO DUC THINH\\T4.pdf",
+          "rendered_image": "D:\\production_ocr\\evaluation\\ground_truth\\source_pages\\1575\\T4\\T4_page_013.png"
+        }
+      ]
+    }
+  ]
+}
