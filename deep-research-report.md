@@ -1,901 +1,321 @@
-# Tổng quan  
-Tài liệu này đề ra lộ trình 10 giờ làm việc tại công ty để xây dựng **pipeline OCR baseline** dùng LM Studio với mô hình `Qwen3-VL-8B-Instruct (GGUF Q4_K_M)`. Nội dung bao gồm: (1) Thiết lập môi trường LM Studio và tải model Qwen, (2) Phân đoạn trang thành hàng (rows) và cắt trường (fields) với `FormTemplate`, (3) Gọi Qwen để đọc chữ trong các trường, (4) Xử lý và xuất kết quả ra JSON/CSV/Excel, (5) Tích hợp xuất dữ liệu vào Telegram và n8n, (6) Kiểm thử và đo đạc hiệu năng. Mỗi bước có nhiệm vụ rõ ràng, thời gian ước tính, và tiêu chí chấp nhận.  
+```markdown
+# Tài liệu Lộ Trình & Nghiên cứu Dự án OCR Production
 
-## Giả thiết & môi trường  
-- **Đường dẫn dự án:** `D:\production_ocr` (tương tự máy nhà).  
-- **Mô hình:** Qwen3-VL-8B-Instruct (đã load sẵn file GGUF Q4_K_M) trên **LM Studio** local server.  
-- **Phần cứng:** GPU NVIDIA RTX 3050 (6GB), 32GB RAM, CPU Intel i7-14700K.  
-- **Dữ liệu sẵn có:** PDF, ảnh PNG/JPG của các form cần OCR. Có thể dùng `pdf_processor` để chuyển PDF→ảnh.  
-- **Công cụ/libraries:** Python ≥3.9, `lmstudio` SDK hoặc `openai` SDK, `opencv-python`, `numpy`, `Pillow`, `pandas`, `python-telegram-bot` (hoặc `requests`)… Cài đặt ví dụ:  
-  ```bash
-  pip install lmstudio openai opencv-python-headless numpy pillow pandas
-  ```  
-  (câu lệnh lấy từ tài liệu LM Studio). Nếu máy offline, chuẩn bị sẵn cài đặt (hoặc copy gói `.whl`).  
-- **LM Studio:** Chạy LM Studio ở chế độ server trên cổng 1234 (chỉnh từ tab Developer hoặc dùng lệnh CLI: `lms server start`). Tiếp theo, đăng nhập trong Python và tải model Qwen:  
-  ```python
-  import lmstudio as lms
-  with lms.Client(api_key="lm-studio") as client:   # lấy token hoặc dùng "lm-studio"
-      model = client.llm.model("hf://Qwen/Qwen3-VL-8B-Instruct")
-      model.load()
-  ```  
-  hoặc dùng `openai` SDK:  
-  ```python
-  from openai import OpenAI
-  client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
-  response = client.chat.completions.create(
-      model="Qwen/Qwen3-VL-8B-Instruct",
-      messages=[{"role":"user","content":"Hello"}]
-  )
-  ```  
-  (ví dụ trên cho thấy cách dùng OpenAI SDK với LM Studio). Cần đảm bảo **model identifier** đúng (theo danh sách trong LM Studio sau khi tải model).  
+## Tóm tắt  
+Tài liệu này trình bày lộ trình chi tiết cho việc xây dựng **hệ thống OCR production** dựa trên mô hình Qwen3-VL-8B-Instruct (chạy cục bộ qua LM Studio) tại công ty. Từ Pha P0 (khởi tạo dự án) đến Pha P14 (chuẩn bị fine-tuning tương lai), mỗi pha được mô tả với: **mục tiêu**, **đầu vào**, **đầu ra**, **tiêu chí chấp nhận**, **kiểm thử/benchmark**, và **artifact cần lưu**. Bên cạnh đó có so sánh các chiến lược đầu vào (cả hàng, từng trường, hybrid) với các chỉ số đo lường (độ chính xác, độ trễ, VRAM, độ phức tạp), ví dụ **JSON schema** cho kết quả có cấu trúc, và **cấu trúc thư mục lưu artifact** (logs, data/ocr/raw, data/ocr/parsed, docs/HANDOFF). Các quy tắc quan trọng (như không đoán dữ liệu, sử dụng [UNK] với ký tự khó đọc, không hard-code endpoint/model ID, tách biệt metadata cấp trang và dữ liệu hàng) cũng được nhấn mạnh. Mục tiêu cuối cùng là một pipeline end-to-end tích hợp Telegram/n8n → tiền xử lý ảnh → đăng ký form → phân đoạn hàng và trường → Qwen OCR → xác nhận đầu ra → xuất Excel → Telegram QC.
 
-## Lộ trình công việc chi tiết  
-Dưới đây chia ngày làm 10 giờ (08:00–18:00) thành các bước lớn. *Giả sử sáng 08:00–12:00 dành cho nhập liệu (GT), buổi chiều thực hiện công việc kế hoạch dưới đây. Nếu việc GT kéo dài, ưu tiên hoàn thành các bước ban đầu trước, hoãn tích hợp/benchmark về sau.*
+## P0 – Thiết lập ban đầu  
+- **Mục tiêu:** Đảm bảo repository sẵn sàng, cài đặt môi trường phù hợp. Xác định các phụ thuộc cần thiết (Python, thư viện, LM Studio, llama.cpp hoặc client Qwen).  
+- **Đầu vào:** Code hiện tại trong `D:\production_ocr`, hướng dẫn của nhóm, danh sách phụ thuộc (nếu có).  
+- **Đầu ra:** Môi trường Python/PowerShell có thể chạy script; phiên bản LM Studio hoạt động; kết nối đến Qwen3-VL-8B-Instruct sẵn sàng.  
+- **Các file/modules:** Kiểm tra tồn tại `requirements.txt`/`pyproject.toml`; `app/form_template.py`, `row_detector.py`, `form_registry`, `pdf_processor`, `image_preprocessing`, `segmentation`, `ocr (Qwen)`, `validator`, `mapper`, `excel_writer`, `telegram_integration`, `n8n_integration`.  
+- **Tiêu chí chấp nhận:** Môi trường khởi động mà không lỗi quan trọng; LM Studio server được xác định (địa chỉ, port); có thể xác nhận model ID Qwen3-VL-8B-Instruct đang sẵn sàng.  
+- **Kiểm thử:** Chạy thử `python -V`; kiểm tra `pip install -r requirements.txt`; thử yêu cầu đơn giản đến LM Studio (ví dụ dùng `curl` hoặc client llama.cpp) để xác nhận model phản hồi.  
+- **Không được:** Hard-code đường dẫn chưa xác định (như endpoint `localhost:1234` mà chưa kiểm tra).  
+- **Artifact:** Ghi lại kết quả kiểm tra (log cài đặt, thông tin GPU/VRAM, endpoint, model id) để đưa vào báo cáo hiện trạng.
 
-- **08:00–12:00:** Nhập liệu GT (đã có kế hoạch riêng).  
-- **13:00–13:30:** *Thiết lập môi trường.* Chạy LM Studio server, tải model. Cài đặt các thư viện (pip như trên). Test chạy một câu lệnh chat đơn giản qua API để kiểm tra kết nối (nếu được, câu trả lời từ Qwen phản hồi đúng, ví dụ “Hello” trả về “Xin chào” chẳng hạn). **Tiêu chí Pass:** LM Studio server chạy ổn định, model Qwen3-VL-8B-Instruct đã load, lệnh chat đầu tiên thành công. (Tham khảo tài liệu.)
+## P1 – Môi trường OCR Baseline  
+- **Mục tiêu:** Thiết lập client kết nối với LM Studio và mô hình Qwen3-VL-8B-Instruct. Đảm bảo có thể gửi một ảnh mẫu (page ảnh đơn) và nhận được phản hồi text thô.  
+- **Đầu vào:** Ảnh mẫu đơn giản (ví dụ ảnh văn bản có ký tự rõ); thông tin model (Qwen3-VL-8B-Instruct Q4_K_M); endpoint LM Studio.  
+- **Đầu ra:** Kịch bản Python thử nghiệm thành công, ghi nhận đầu ra gốc (raw) của Qwen. Ví dụ, dùng thư viện `llama.cpp` hoặc `openai`-client để gọi completion.  
+- **Các file/modules:** Tạo file thử nghiệm như `tests/test_lmstudio_connectivity.py`. Không cần thay đổi code chính.  
+- **Tiêu chí chấp nhận:** LM Studio server phản hồi trạng thái OK; client Python có thể lấy mẫu văn bản từ hình ảnh; dữ liệu thô (text) được lưu vào `data/ocr/raw/` (hoặc log). Không có lỗi OOM.  
+- **Kiểm thử:** Thực thi kịch bản Python với `llm = Llama.from_pretrained(...); llm.create_chat_completion(..."Đọc văn bản từ ảnh...")`; xác nhận output là chuỗi JSON/text. Đo thời gian phản hồi.  
+- **Không được:** Xử lý dữ liệu đầu vào theo cách làm mất thông tin (ví dụ resize quá nhỏ). Không gọi API bên ngoài (dù laptop có Internet, nhưng cần offline).  
+- **Artifact:** Lưu output thô (`data/ocr/raw/sample_page.json`), log chạy model, các thông số (prompt version, model ID, thời gian thực hiện, VRAM tiêu thụ). 
 
-- **13:30–14:30:** *Xây dựng module phân đoạn (P6.3).* Tận dụng lớp `FormTemplate` đã có (trong `app/form_template.py`) để cắt ảnh trang đã align thành 20 ảnh hàng. Ví dụ:  
-  ```python
-  from app.form_template import FormTemplate
-  import cv2
-  page = cv2.imread("aligned_page001.png", cv2.IMREAD_COLOR)
-  template = FormTemplate("T1")     # T1 là loại form đang dùng
-  rows = template.row_crop(page)    # list 20 ảnh hàng
-  for r in rows:
-      assert r.shape[0] > 0
-  ```  
-  Sau đó dùng `template.field_crop(row_img)` để cắt mỗi ảnh hàng ra 14 ảnh trường (STT, Ngày, etc). Kiểm tra sơ bộ: trên một trang mẫu, hiển thị hình 20 hàng và 14 trường để xác nhận khớp. Tạo file `app/segmentation.py` chứa hàm `segment_page(image_path, template)` trả về danh sách hàng kèm ảnh và bbox, và file `tests/test_segmentation.py` để kiểm thử tự động trên trang mẫu (ví dụ `1207_T1_p003`). **Tiêu chí Pass:** Ảnh đầu ra có đúng 20 hàng và mỗi hàng 14 trường; vị trí ô cắt khớp với form (kiểm tra bằng mắt hoặc mã).
+## P2 – Chuẩn bị Ground Truth (GT) Dev  
+- **Mục tiêu:** Hoàn tất annotation (ground truth) cho bộ Dev (24 trang). GT gồm metadata đầu trang (`member_name`, `week_number`, `team_name`), và dòng dữ liệu sản xuất (14 cột canonical).  
+- **Đầu vào:** Mẫu form có 24 trang cần GT; file hướng dẫn annotation.  
+- **Đầu ra:** File `dev_annotations.jsonl` đã điền đầy đủ 24 trang (được kiểm tra xác nhận). Metadata và dữ liệu hàng được tách biệt.  
+- **Các file/modules:** `dev_annotations.jsonl`, `ground_truth_dev_24pages.pdf`, hướng dẫn `DEV_ANNOTATION_GUIDE.md`.  
+- **Tiêu chí chấp nhận:** GT phải bao gồm đủ 14 trường theo hàng (theo schema đã định) cho mỗi dòng có sản lượng, cũng như metadata trang (không ghi `team_name` vào các trường hàng). Đánh giá ngẫu nhiên để chắc chắn chất lượng annotation.  
+- **Kiểm thử:** So sánh GT mới với phiếu gốc; kiểm tra tính nhất quán schema, kiểu dữ liệu (số/chuỗi), xử lý null khi không có giá trị.  
+- **Không được:** Không điền nháp hoặc thêm trường ngoài quy định (ví dụ không tự thêm `Tổ/Nhóm` vào 14 trường).  
+- **Artifact:** Cập nhật `dev_annotations.jsonl`, phiên bản mới, và file summary báo lỗi (nếu có).
 
-- **14:30–15:00:** *Chạy thử phân đoạn.* Thử đoạn mã trên một trang. Ví dụ:  
-  ```bash
-  python tests/test_segmentation.py
-  ```  
-  Đảm bảo không có lệch dòng: mỗi row chỉ chứa thông tin của row tương ứng. Sửa lại tham số nếu cần (ví dụ do alignment chưa chính xác). Nếu gặp khó khăn, tạm thời có thể tăng margin/hạ threshold mask để đảm bảo cắt đúng. **Tiêu chí Pass:** Đầu ra test không báo lỗi, hình các hàng/trường hiển thị chính xác.
+## P3 – Xử lý đầu vào (PDF/PNG/JPG)  
+- **Mục tiêu:** Xác định contract của input: định dạng đầu vào (PDF hoặc hình ảnh), biến đổi khi cần.  
+- **Đầu vào:** File PDF hoặc hình ảnh chụp form. (Môi trường có sẵn module `pdf_processor`?).  
+- **Đầu ra:** Hình ảnh trang đơn đã chuẩn hóa (ví dụ định DPI, chuyển sang grayscale nếu cần, loại bỏ méo, crop margin).  
+- **Các file/modules:** `data/input/` chứa PDF/PNG; code xử lý PDF (nếu có) thành image; module `image_preprocessing`.  
+- **Tiêu chí chấp nhận:** Ảnh ra đủ độ phân giải (ví dụ ≥300 DPI), tỷ lệ khung hình ổn định, ảnh cân chỉnh gần hoàn chỉnh (ví dụ phẳng, xoay chuẩn). Không làm mất các chi tiết viết tay (không nén mạnh).  
+- **Kiểm thử:** Dùng một số PDF mẫu, kiểm tra ảnh xuất ra (qua `file checkimages`) để đảm bảo chữ không bị vỡ/pixel. Đo thông số như width×height, DPI.  
+- **Không được:** Tự ý giảm DPI quá mạnh hoặc crop sai khiến mất chữ.  
+- **Artifact:** Lưu ảnh trang đầu xử lý (`data/crops/page_example.png`) để kiểm thử sau.
 
-- **15:00–15:30:** *Gọi Qwen thử nghiệm (P6.4).* Viết hàm để gọi API LM Studio cho từng hàng (hoặc từng trường). Ví dụ với OpenAI SDK:  
-  ```python
-  from openai import OpenAI
-  client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
-  ```
-  Tạo prompt mẫu để Qwen đọc nội dung từng hàng gồm 14 trường. Có thể theo dạng chat với system role:  
-  ```
-  System: "Bạn là một hệ thống OCR, nhiệm vụ là đọc các trường thông tin sau từ ảnh: stt, date, order_code, drawing_code, revision, work_code, target_time, start_time, end_time, processed_qty, good_qty, ng_qty, process_detail, note."  
-  User: <Nội dung OCR của 14 trường đã crop>  
-  ```
-  Nên yêu cầu Qwen trả về **định dạng JSON** cho dễ parse (sử dụng tính năng Structured Output). Ví dụ schema JSON:  
+## P4 – Tiền xử lý ảnh  
+- **Mục tiêu:** Nâng cao chất lượng OCR: loại nhiễu, xóa phông, tăng tương phản, chỉnh quang.  
+- **Đầu vào:** Ảnh đã chuẩn hoá từ P3.  
+- **Đầu ra:** Ảnh sạch hơn (clean) cho OCR, trong thư mục `data/preprocessed/`.  
+- **Các file/modules:** Sử dụng/viết các hàm trong `image_preprocessing.py` (ví dụ threshold, deskew).  
+- **Tiêu chí chấp nhận:** Ảnh sau xử lý không mất chữ, ngưỡng sáng/tối ổn định. Đảm bảo không phát sinh artefact.  
+- **Kiểm thử:** So sánh OCR kết quả trước/sau tiền xử lý (ví dụ trên một image test: dùng tỉ lệ correct characters). Đánh giá thủ công xem chữ viết tay rõ hơn.  
+- **Không được:** Quá lạm dụng (ví dụ threshold quá cao làm mất nét nhạt, hay hủy thông tin màu cần thiết).  
+- **Artifact:** Lưu lại ảnh đã xử lý (qua thư mục `data/preprocessed/`) và log các bước xử lý (nếu script có lưu).
+
+## P5 – Đăng ký mẫu (Form Registration)  
+- **Mục tiêu:** Định vị form mẫu để ánh xạ tọa độ:  Đăng ký form (gắn khung hoặc khớp template) cho bản mẫu T1.  
+- **Đầu vào:** Ảnh preprocessed; mẫu form (template) nếu có.  
+- **Đầu ra:** Hệ quy chiếu nhất quán về toạ độ (ví dụ warp perspective) cho tất cả trang T1.  
+- **Các file/modules:** `form_registry.py`, `FormTemplate` (nếu tồn tại). Kiểm tra xem `form_template.py` đã chuẩn hóa profile T1 chưa.  
+- **Tiêu chí chấp nhận:** Mọi trang T1 đều được căn chuẩn theo template: góc, tỷ lệ chính xác. Các hàng và cột sẽ thẳng hàng.  
+- **Kiểm thử:** Áp dụng đăng ký vào một số trang, sau đó vẽ lưới hàng/cột kiểm tra bằng mắt (có thể dùng overlay). Đo sai số pixel.  
+- **Không được:** Thay đổi schema cột/hàng (không move lưới). Không sử dụng deep learning nếu đã có `FormTemplate`. Không tự tạo template mới trừ khi thực sự cần.  
+- **Artifact:** Ảnh đã đăng ký (`data/preprocessed/registered/`), tọa độ khung để kiểm thử.
+
+## P6 – Phân đoạn (Segmentation)  
+- **Mục tiêu:** Chia trang thành 20 khung hàng (row) * 14 khung cột (field).  
+- **Đầu vào:** Ảnh đã đăng ký (aligned page).  
+- **Đầu ra:** Các ảnh con: mỗi hàng là ảnh riêng (`data/crops/<page>/row_001.png`, …); trong mỗi hàng, từng cột nhỏ `field_<col>.png`.  
+- **Các file/modules:** `app/segmentation.py` (mới) dùng `FormTemplate.row_crop()` và `FormTemplate.field_crop()` cho T1/v1 đã cấu hình geometry sẵn. Tạo test đơn trang (ví dụ `tests/test_segmentation.py`) để đảm bảo `20x14` crop đúng vị trí.  
+- **Tiêu chí chấp nhận:** Có đúng **20 ảnh hàng** (ngang) và **14 ảnh cột** trong mỗi hàng, không lẫn dữ liệu giữa các hàng. Chữ trong mỗi field crop phải đầy đủ (không cắt mất). Tất cả bounding box đều nằm trong trang.  
+- **Kiểm thử:** Tạo ảnh ví dụ, chạy segmentation, kiểm tra tổng số crop và mẫu ngẫu nhiên vài crops xem chữ có đúng hàng, cột. (Có thể dùng OCR dòng chữ tĩnh trong hàng để test vị trí).  
+- **Không được:** Không bỏ sót hàng nào (ngay cả nếu trống) – vẫn crop ra để giữ thứ tự. Không thay đổi `FormTemplate`.  
+- **Artifact:** Lưu toàn bộ crops dưới `data/crops/`, tên có cấu trúc dễ hiểu (như `row_001/col_01.png`). Lưu log ghi cấp số hàng/cột của từng crop.
+
+## P7 – OCR Qwen Baseline  
+- **Mục tiêu:** Thiết lập pipeline OCR sơ bộ: từ ảnh crop (có thể nguyên hàng hoặc từng ô) sang text. Định rõ chiến lược đầu vào (toàn hàng, từng ô, hay hybrid).  
+- **Đầu vào:** Các ảnh crop từ P6. Ví dụ bắt đầu với ảnh hàng đầu tiên hoặc một vài ô tiêu biểu.  
+- **Đầu ra:** Output văn bản thô hoặc JSON thô, chưa validate. Mỗi hàng/ô có kết quả text hoặc JSON tạm thời. Lưu kết quả vào `data/ocr/raw/`.  
+- **Các file/modules:** Tạo prompt cho Qwen (ví dụ `prompts/qwen_row_v001.txt`, `prompts/qwen_field_v001.txt`). Sử dụng llama.cpp/LlamaCpp client để gọi Qwen3-VL-8B-Instruct. Test cả 2 chiến lược: (A) gửi nguyên ảnh hàng, (B) gửi từng ảnh trường một.  
+- **Tiêu chí chấp nhận:** Kết quả không lỗi cú pháp JSON (nếu có) và có chứa hầu hết text. So sánh thử output với GT trên vài mẫu. Đầu ra lưu định dạng JSON tạm (`data/ocr/raw/<page>_<row>.json`).  
+- **Kiểm thử:** Chạy OCR cho ít nhất 1 trang (ví dụ page003), chuyển kết quả JSON về Python, parse so sánh với GT: đo CER, xem có sai trường nào rõ. Đo độ trễ cho mỗi chiến lược.  
+- **Không được:** Giả định kết quả hoàn hảo – luôn phải có bước kiểm tra (như validator). Tránh prompt quá dài/bền (nếu nhiều ảnh) do giới hạn VRAM. Không in ra các thông tin nội bộ.  
+- **Artifact:** Lưu raw JSON, logs (prompt dùng, thời gian), JSON đã parse vào `data/ocr/parsed/`. Ghi chú chiến lược đã thử (Row vs Field) và hiệu năng.
+
+## P8 – Đầu ra có cấu trúc & Xác thực  
+- **Mục tiêu:** Thiết kế định dạng đầu ra cuối cùng theo **schema JSON canonical**. Chỉ giữ 14 trường đã định cho mỗi hàng. Tách metadata trang (như `member_name`, `week_number`, `team_name`) ra riêng.  
+- **Đầu vào:** Output từ P7. Ví dụ JSON thô, văn bản thô.  
+- **Đầu ra:** JSON chuẩn cho mỗi hàng, với 14 thuộc tính canonical: `stt`, `date`, `order_code`, `drawing_code`, `revision`, `work_code`, `target_time`, `start_time`, `end_time`, `processed_qty`, `good_qty`, `ng_qty`, `process_detail`, `note`. (Ví dụ JSON schema mẫu bên dưới.) Metadata trang có thể lưu ở phần riêng.  
+- **Ví dụ JSON Schema:**  
   ```json
-  {"type":"object","properties":{
-      "stt":{"type":"string"}, ... , "note":{"type":"string"}
-  },"required":["stt","date",...,"note"]}
-  ```
-  Rồi gọi API:  
-  ```python
-  schema = {
-      "type":"json_schema", "json_schema":{
-          "name":"row_data", 
-          "schema": { ... } 
-      }
+  {
+    "type": "object",
+    "properties": {
+      "stt":            {"type": "integer"},
+      "date":           {"type": "string", "format": "date"},
+      "order_code":     {"type": "string"},
+      "drawing_code":   {"type": "string"},
+      "revision":       {"type": "string"},
+      "work_code":      {"type": "string"},
+      "target_time":    {"type": "integer"},
+      "start_time":     {"type": "string", "format": "time"},
+      "end_time":       {"type": "string", "format": "time"},
+      "processed_qty":  {"type": "integer"},
+      "good_qty":       {"type": "integer"},
+      "ng_qty":         {"type": "integer"},
+      "process_detail": {"type": "string"},
+      "note":           {"type": "string"}
+    },
+    "required": ["stt","date","order_code","drawing_code","revision","work_code",
+                 "target_time","start_time","end_time","processed_qty",
+                 "good_qty","ng_qty","process_detail","note"]
   }
-  messages = [
-      {"role":"system","content":"Bạn là hệ thống OCR..."},
-      {"role":"user","content": image_to_base64_or_text }
-  ]
-  resp = client.chat.completions.create(model="Qwen/Qwen3-VL-8B-Instruct",
-                                       messages=messages,
-                                       response_format=schema)
-  data = json.loads(resp.choices[0].message.content)
   ```  
-  (Lưu ý: không phải mọi model <7B hỗ trợ chắc structured output. Qwen8B rất có thể hỗ trợ tốt định dạng JSON.) **Tiêu chí Pass:** Với một hàng test, Qwen trả về JSON hợp lệ, đầy đủ 14 trường; nếu không, thử yêu cầu “Trả lời định dạng JSON” hoặc parse thủ công từ text.
+- **Tiêu chí chấp nhận:** JSON hợp lệ theo schema (dùng `jsonschema` để kiểm tra). Không có trường dư/thiếu. Ký tự mờ thành `[UNK]` hoặc `null`.  
+- **Kiểm thử:** Tạo hàm validator: kiểm tra từng JSON với schema, tìm lỗi (loại giá trị sai, trường thiếu). Đo tỉ lệ JSON hợp lệ/trên tổng mẫu (JSON validity rate).  
+- **Không được:** Chuyển data từ hàng khác, sửa đổi giá trị theo "kiến thức riêng" (ví dụ không dùng logic nghiệp vụ để chỉnh lỗi OCR). Xuất trường mới ngoài 14 hoặc metadata trang (như `team_name`). Tất cả metadata trang không nên nằm trong output JSON mỗi hàng.  
+- **Artifact:** Lưu JSON đã validate vào `data/ocr/validated/`. Tạo `validator_report.md` nếu cần ghi lại các lỗi. Ghi chú các giả định (ví dụ dùng `[UNK]`, `null`).
 
-- **15:30–16:30:** *Xây dựng pipeline end-to-end.* Kết hợp phân đoạn và gọi Qwen: lặp qua tất cả 20 hàng của một trang, gửi từng hàng qua Qwen, thu kết quả JSON. Định nghĩa hàm ví dụ:
-  ```python
-  def ocr_page(image_path):
-      rows = segment_page(image_path, template)
-      results = []
-      for row in rows:
-          resp = client.chat.completions.create( model=model_id,
-                       messages=[...system, user with row image...],
-                       response_format=schema )
-          results.append(json.loads(resp.choices[0].message.content))
-      return results
-  ```
-  Lưu các kết quả vào file JSON/CSV. Ví dụ dùng `pandas` để ghi CSV theo định dạng Canonical:  
-  ```python
-  import pandas as pd
-  df = pd.DataFrame(results, columns=[...field list...])
-  df.to_csv("output_page001.csv", index=False)
-  ```
-  **Tiêu chí Pass:** Chạy được pipeline cho một trang mẫu, tạo ra file CSV chứa đủ 20 dòng (tương ứng 20 hàng); nội dung các cột khớp dữ liệu trên ảnh (đọc thử 1-2 dòng).  
+## P9 – Đánh giá độ chính xác (Benchmark)  
+- **Mục tiêu:** Sử dụng GT để đo **độ chính xác** của hệ thống OCR. Xác định các metric: Độ lỗi ký tự (CER), lỗi từ (WER), độ chính xác trường (đúng giá trị), độ chính xác dòng (tất cả trường của dòng đúng), tốc độ xử lý, VRAM.  
+- **Đầu vào:** Kết quả OCR (validated JSON), ground truth (`dev_annotations.jsonl`).  
+- **Đầu ra:** Báo cáo số liệu (CSV hoặc Markdown) ghi rõ: Character Accuracy (1-CER), Field Accuracy (phần trăm trường đúng), Row Accuracy, Page Accuracy, JSON validity rate, Retry rate (nếu có), Time/row, Time/page.  
+- **Các chỉ số đo lường:**  
+  - *CER/WER:* Sai số ký tự/từ (dùng chuẩn thống kê, phân tách token giống Whisper/SpeechBrain).  
+  - *Field accuracy:* % trường đúng giá trị (kiểm định kiểu dữ liệu).  
+  - *Row accuracy:* % dòng hoàn toàn đúng.  
+  - *JSON validity:* % kết quả hợp lệ JSON.  
+  - *Latency:* bình quân giây/truy vấn (row hoặc page).  
+  - *VRAM usage:* max trong thực thi.  
+  - *Error categories:* phân tích nguyên nhân sai (sai định dạng, missing, [UNK],...).  
+- **Tiêu chí chấp nhận:** Chưa định sẵn ngưỡng (cần test trước). Đạt độ ổn định (ví dụ ưu tiên CER thấp trên GT). Đảm bảo tất cả trường ít nhất xuất kết quả.  
+- **Kiểm thử:** Thực thi benchmark script so sánh từng hàng với GT, ghi CSV. Thực hiện ít nhất 3 lần để lấy số ổn định. Báo cáo vào `evaluation/benchmark_results.csv`.  
+- **Không được:** Đánh giá cảm tính. Không đặt target trước mà chưa đo. Dùng [22†L293-L301] làm tham khảo: ưu tiên CER/WER trước, sau đó mở rộng đánh giá nâng cao.
 
-- **16:30–17:00:** *Kiểm thử & đánh giá.* Chạy pipeline trên nhiều trang mẫu (ví dụ 3–7 trang đầu bộ baseline). Đo thời gian xử lý mỗi trang (`time.time()` trước – sau, hoặc `timeit`). Lưu ý VRAM 6GB có thể cần xử lý chuỗi tải: Qwen8B GGUF đã quant 4-bit (Q4_K_M), nên ưu tiên độ phân giải ảnh vừa phải (có thể resize mỗi trường <512px). Ghi nhận: tốc độ trung bình (ms/row), tỷ lệ lỗi (so với GT), các lỗi phổ biến. Phân tích: nếu Qwen trả lời không chính xác, điều chỉnh prompt hoặc xử lý hậu kì (xem mục sau). **Tiêu chí Pass:** Pipeline hoạt động liên tục, không bị crash do OOM; thời gian ước tính ≤5 giây/hàng (tương đương ≤100s/trang) là tạm chấp nhận; độ chính xác ban đầu ≥80% (số trường đúng).  
+## P10 – Xuất Excel  
+- **Mục tiêu:** Chuyển kết quả JSON đã validate thành file Excel (hoặc CSV) xuất cho business. Mỗi trang ➔ một sheet, hoặc nối vào CSV.  
+- **Đầu vào:** JSON hợp lệ (phân theo trang), có thể metadata trang (tên NV, tổ, tuần).  
+- **Đầu ra:** Tệp `output.xlsx` hoặc `output.csv` trên folder `data/output/`, với đầy đủ cột tương ứng (14 trường và metadata). Bảo đảm traceability (giữ link đến `source json raw`).  
+- **Các file/modules:** `excel_writer.py`. Kiểm tra nếu đã có mẫu mã (liên quan đến `sheet`, `csv`).  
+- **Tiêu chí chấp nhận:** File Excel mở được, đúng định dạng cột, dữ liệu trùng khớp JSON. Sheet hoặc file ghi chú ngày/ID.  
+- **Kiểm thử:** Mở file bằng Excel hoặc pandas, so sánh vài dòng với JSON. So sánh cấu trúc (headers).  
+- **Không được:** Ghi đè raw JSON. Không để lẫn data từ các trang khác.  
 
-- **17:00–17:30:** *Tích hợp Telegram và n8n (nếu đủ thời gian).* Chuẩn bị file CSV/XLSX đầu ra để gửi qua Telegram hoặc nén. Ví dụ dùng API Telegram Bot (`python-telegram-bot` hoặc `requests`):  
-  ```python
-  import requests
-  token = "TELEGRAM_BOT_TOKEN"
-  chat_id = "CHAT_ID"
-  files = {"document": open("output_page001.csv","rb")}
-  requests.post(f"https://api.telegram.org/bot{token}/sendDocument?chat_id={chat_id}", files=files)
-  ```  
-  (hoặc `sendMessage` để gửi tin nhắn văn bản).  
-  Với n8n: có thể định nghĩa một *Webhook* HTTP nhận dữ liệu. Ví dụ, n8n Webhook nhận `POST` JSON:  
-  ```python
-  import requests
-  url = "http://<n8n-host>/webhook/ocrdata"
-  data = {"rows": results}
-  requests.post(url, json=data)
-  ```  
-  Sau đó trong n8n, xử lý JSON này để đưa vào Google Sheets hoặc CSDL. **Tiêu chí Pass:** File CSV/XLSX xuất ra có định dạng đúng và đủ cột; ví dụ tin nhắn Telegram được gửi thành công (hoặc n8n nhận được mẫu JSON đúng schema).  
+## P11 – Tích hợp Telegram (Giai đoạn đầu)  
+- **Mục tiêu:** (Lên kế hoạch giai đoạn sau) Cho phép nhận tài liệu từ Telegram và gửi kết quả QA.  
+- **Đầu vào/Đầu ra:** (Không cần làm ngay – để P12 và P13).  
 
-- **17:30–18:00:** *Dự phòng & tối ưu.* Dành cho các công việc phát sinh: chỉnh sửa prompt nếu Qwen trả lời không tốt (ví dụ thử đưa thông tin `system` rõ hơn), giảm kích thước ảnh nếu OOM, kiểm tra lại với GT, soạn kịch bản chạy các trang còn lại. Nếu còn dư thời gian, bắt đầu công việc ngày tiếp theo như nghiên cứu cải thiện (ví dụ fine-tune, hoặc sử dụng structured output tiên tiến hơn).
+## P12 – Tích hợp n8n (Pipeline End-to-End)  
+- **Mục tiêu:** (Sau khi pipeline core ổn định) Tự động hóa: Telegram → n8n trigger → OCR pipeline → Excel → gửi trả kết quả.  
+- **Đầu vào/Đầu ra:** Tài liệu mô tả n8n workflow, config, script cho call Python.  
+- **Kiểm thử:** Tạo sample n8n để chạy pipeline end-to-end.  
+- **Không được:** Không thực hiện trước khi OCR core ổn định.  
 
-## So sánh nhiệm vụ
+## P13 – Ổn định hệ thống (Harden)  
+- **Mục tiêu:** Cải thiện độ tin cậy: xử lý lỗi, timeout, retry, logging, config tách biệt, caching, tài nguyên.  
+- **Đầu ra:** Phiên bản cuối cùng của script, cấu hình rõ ràng, hệ thống test tích hợp.  
+- **Kiểm thử:** Đóng gói, chạy test end-to-end, stress-test với nhiều ảnh/flows.  
 
-| Nhiệm vụ                           | Thời gian dự kiến | Tiêu chí chấp nhận                      |
-|------------------------------------|-------------------|-----------------------------------------|
-| **Thiết lập LM Studio & model**    | 0.5 giờ           | Server chạy, model Qwen được load (test chat thành công). |
-| **Phân đoạn ảnh thành hàng/ trường** | 1.5 giờ         | Xuất ra 20 ảnh hàng × 14 ảnh trường đúng; vị trí khớp form. |
-| **Kiểm thử phân đoạn**             | 0.5 giờ           | Script kiểm thử trả về “Passed” cho trang mẫu (hàng/trường đầy đủ). |
-| **Triển khai gọi Qwen OCR**        | 1.0 giờ           | Gọi Qwen thành công, nhận phản hồi JSON (ít nhất trên 1 hàng). |
-| **Pipeline end-to-end**            | 1.0 giờ           | Kết hợp seg+OCR, tạo được CSV chứa 20 dòng dữ liệu hợp lệ. |
-| **Kiểm thử & Benchmark**           | 0.5 giờ           | Đo thời gian xử lý, ghi nhận TPS/latency, so sánh với GT. |
-| **Tích hợp Telegram / n8n**        | 0.5 giờ           | Gửi được file CSV/JSON ra Telegram hoặc webhook n8n. |
-| **Dự phòng & tối ưu**             | 1.0 giờ           | Xử lý lỗi phát sinh: cải thiện prompt, xử lý ảnh, dự phòng. |
+## P14 – Lộ trình Fine-Tuning trong tương lai  
+- **Mục tiêu:** Thu thập dữ liệu huấn luyện, đánh giá xem có cần fine-tune Qwen cho script đặc thù hay không.  
+- **Đầu ra:** Chiến lược/đề xuất fine-tuning (nếu cần) dựa trên lỗi thực nghiệm (ví dụ LoRA với data viết tay).  
+- **Lưu ý:** Chỉ thực hiện sau khi baseline đã được benchmark kỹ. Chỉ bắt đầu khi xác nhận bộ dữ liệu đủ chuẩn.
 
-## Đồ thị luồng công việc (Pipeline)  
-```mermaid
-graph TD
-  Page["Ảnh trang đã align"] -->|row_crop| Row1["Hàng 1"]
-  Page -->|...| Row20["Hàng 20"]
-  Row1 -->|field_crop| Fields1["14 trường hàng 1"]
-  Row20 -->|field_crop| Fields20["14 trường hàng 20"]
-  Fields1 -->|OCR (Qwen)| JSON1["JSON dòng 1"]
-  Fields20 -->|OCR (Qwen)| JSON20["JSON dòng 20"]
-  JSON1 & JSON20 --> CSV["Tập tin CSV/Excel"]
-  CSV --> Telegram["Telegram Bot"]
-  CSV --> n8n["Webhook n8n"]
+## So sánh chiến lược đầu vào (Bảng tổng hợp)
+
+| Chiến lược         | Mô tả                                    | Độ chính xác (Ưu/Nhược)            | Độ trễ                   | VRAM                    | Độ phức tạp      |
+|--------------------|------------------------------------------|-------------------------------------|--------------------------|-------------------------|------------------|
+| **Nguyên hàng**    | Gửi cả ảnh hàng (20×~n chứ không cắt)    | Duy trì ngữ cảnh tốt, ít truy vấn    | Cao (một request lớn)    | Cao (model xử lý ảnh lớn)| Trung bình       |
+| **Từng trường**    | Chia từng ô (14 hình/1 hàng)            | Chính xác cao cho mỗi ô riêng biệt  | Thấp/Middle (nhiều truy vấn nhỏ) | Thấp (ảnh nhỏ hơn) | Phức tạp (14 lần gọi) |
+| **Hybrid (kết hợp)** | Kết hợp trên nhóm trường (n ví dụ)    | Cân bằng giữa độ chính xác và tốc độ | Trung bình              | Trung bình              | Trung bình cao   |
+
+**Các chỉ số đo lường:** Sử dụng các metric: độ chính xác ký tự (CER), ký tự [UNK], từ bị thiếu; latency tính theo truy vấn; VRAM max; số lần gọi model (complexity). Mục tiêu so sánh: xác định trade-off giữa accuracy và hiệu năng.
+
+## Các quy tắc chung
+
+- Luôn **INSPECT FIRST** trước khi code. Đánh giá repository, version, endpoint, model.
+- **REPORT TRƯỚC khi SỬA:** Ghi lại trạng thái hiện tại (module có/sẵn, thiếu).
+- **Không tự ý thay đổi schema/chuyển logic lớn** (ví dụ thêm trường mới, thay đổi FormTemplate) mà chưa hỏi lại. Nếu cần, đánh dấu `DECISION REQUIRED`.
+- **Không hard-code:** endpoint LM Studio, ID model, thông số chưa biết.
+- **Prompt/logic Prompt:** Giữ rõ ràng theo ví dụ Alibaba: không suy diễn, blank→null, ký tự mờ→`?` hoặc `[UNK]`.
+- **Không tin tưởng output mô hình:** Luôn validate JSON theo schema trước khi dùng.
+- **Lưu trữ đầu ra thô:** Để phục vụ debug (thô và đã parse).
+- **Tách metadata cấp trang và dữ liệu hàng:** Ví dụ `team_name`, `member_name`, `week_number` không nằm trong JSON mỗi hàng.
+- **Kiểm tra mọi field/trường:** Không bỏ sót (nêu NULL nếu trống).
+- **Cấu trúc thư mục:** Dùng `data/ocr/raw/`, `data/ocr/parsed/`, `logs/`, `docs/HANDOFF/`.
+
+## Đề xuất cấu trúc thư mục lưu artifact
+
+- `data/ocr/raw/`: Kết quả OCR thô (JSON từ model).  
+- `data/ocr/parsed/`: Kết quả đã parse/validate.  
+- `logs/`: File log các bước, thông tin model, alert.  
+- `docs/HANDOFF/`: Báo cáo cuối mỗi ngày (ví dụ `YYYY-MM-DD_DAYn.md`).  
+- `evaluation/`: Kết quả benchmark (.csv, .md).  
+- `data/output/`: File Excel/CSV đầu ra.  
+
+## Tóm lại
+
+Pipeline end-to-end sẽ lần lượt là: **Telegram → n8n → Tiền xử lý hình ảnh → Đăng ký mẫu form → Phân đoạn hàng/trường → Gọi Qwen OCR (qua LM Studio) → Xác thực JSON → Xuất Excel → Telegram QC**. Các giai đoạn P0–P14 trên đảm bảo kiến trúc, kiểm thử, và khả năng nâng cấp (prompt version, fine-tuning) cho dự án hoàn thiện.  
 ```
 
-- **Giải thích sơ đồ:** Ảnh trang đầu vào được cắt thành 20 ảnh hàng (row). Mỗi hàng lại cắt thành 14 ảnh trường theo template. Mỗi ảnh trường (hoặc toàn bộ hàng) được gửi vào mô hình Qwen để tạo JSON. Các JSON dòng được gom vào file CSV/XLSX. Cuối cùng, file này có thể đẩy tới Telegram hoặc n8n để xử lý tiếp.
+```markdown
+# PRODUCTION_OCR_AUTONOMOUS_EXECUTION_PROMPT.md
 
-## Lịch trình dự kiến (Timeline)
+## Giới thiệu  
+Bạn là AI engineer tự động, chịu trách nhiệm hoàn thiện hệ thống OCR production như đã mô tả trong **Tài liệu lộ trình** (`PRODUCTION_OCR_ROADMAP.md`). Nhiệm vụ của bạn là **tuân thủ quy trình**: inspect (kiểm tra) → báo cáo → lập kế hoạch → triển khai code → kiểm thử → đánh giá hiệu năng → lưu trữ kết quả → tự chuyển sang nhiệm vụ kế tiếp khi đạt tiêu chí. **Tuyệt đối** tuân thủ quy tắc: không làm gì ngoài nhiệm vụ, không giả định thiếu sót, không tự ý thay đổi kiến trúc hay schema.
+
+### Quy trình tự động
+
+1. **KIỂM TRA BAN ĐẦU**: Đọc kỹ *ROADMAP*. Chưa sửa code.  
+   - **Mục tiêu:** Hiểu rõ trạng thái repository `D:\production_ocr`.  
+   - **Công việc:** Liệt kê cây thư mục hiện tại, các module, môi trường (Python version, thư viện). Kiểm tra file config liên quan (endpoint LM Studio, model ID nếu có).  
+   - **Kết quả yêu cầu:** Tạo file báo cáo `CURRENT_STATE.md` (hoặc tương đương) với các mục: (A) Cây thư mục hiện tại; (B) Module chức năng đã có/đang hoạt động; (C) Module còn thiếu/cần viết; (D) Có thể tái sử dụng module nào; (E) Module cũ của OCR (nếu có) cần giữ hoặc loại; (F) Phụ thuộc hiện có; (G) Phiên bản Python; (H) Địa chỉ LM Studio server (nếu tìm được); (I) Model ID (nếu biết); (J) Những khác biệt giữa repository và roadmap.  
+   - **Tiêu chí:** Báo cáo phải đầy đủ (như trên). Nếu có thông tin chưa rõ, ghi thành `UNKNOWN: ...` hoặc tạo file `BLOCKERS.md` liệt kê các phần không rõ (không đoán).  
+
+2. **XÁC ĐỊNH MÔI TRƯỜNG KẾT NỐI (P1)**: Sau khi inspect và báo cáo, tiến hành cài đặt/testing.  
+   - **Mục tiêu:** Xác nhận kết nối tới LM Studio và model Qwen3-VL-8B-Instruct.  
+   - **Công việc:**  
+     - Tìm (hoặc khởi động) local LM Studio server (ví dụ `127.0.0.1:port`). Không tự đoán port; kiểm tra config hoặc chạy thử lệnh phổ biến (`llama serve`, `llama-cli`).  
+     - Viết script Python thử: ví dụ sử dụng `llama_cpp` hoặc `openai` để gọi một yêu cầu đơn giản (chat completion) với một ảnh đơn giản.  
+     - Ghi nhận đầu ra (store raw output).  
+   - **Tiêu chí:** LM Studio phản hồi (không OOM). Python client nhận được response (text/JSON). Lưu response thô vào `data/ocr/raw/test_output.json`.  
+   - **Kiểm thử:** Chạy lệnh sample, ví dụ:  
+     ```powershell
+     python - << 'EOF'
+     from llama_cpp import Llama
+     llm = Llama.from_pretrained("Qwen3-VL-8B-Instruct-Q4_K_M.gguf", n_ctx=2048)
+     res = llm.create_chat_completion(messages=[{"role":"user","content":"Đọc chữ trên ảnh: Xin ch\u00e0o"}], max_tokens=10)
+     print(res.choices[0].message.content)
+     EOF
+     ```  
+     (hoặc dùng `curl` nếu model expose API). Xác nhận có output.  
+   - **Không được:** Hard-code endpoint/model; cố định port mà chưa kiểm tra.
+
+3. **PHÂN ĐOẠN HÌNH ẢNH (P6)**: Xây dựng mã cắt hàng/cột (segmentation).  
+   - **Mục tiêu:** Tách mỗi trang thành 20 hàng và 14 cột như quy định.  
+   - **Công việc:**  
+     - Tạo file `app/segmentation.py`. Dùng `FormTemplate` có sẵn: gọi `row_crop()` để cắt 20 hàng, rồi `field_crop()` cho mỗi hàng (14 trường).  
+     - Tạo test đơn trang (ví dụ `tests/test_segmentation.py`) kiểm tra số lượng ảnh crop.  
+   - **Tiêu chí:** Có 20 ảnh hàng và 14 ảnh cột trong mỗi hàng. Kết quả crop lưu trong `data/crops/<page>/...`.  
+   - **Kiểm thử:** Chạy test segmentation cho `1207/T1/page003`. Kiểm tra: đúng 20 rows × 14 fields, bounding boxes khớp, không lẫn dòng.  
+
+4. **OCR QWEN CƠ BẢN (P7)**: Chạy Qwen trên crops.  
+   - **Mục tiêu:** Lấy văn bản đầu ra cho mỗi crop.  
+   - **Công việc:**  
+     - Tạo prompt test (ví dụ `prompts/qwen_ocr.txt`) trong code.  
+     - Thử cả hai chiến lược: (A) gửi ảnh cả hàng, (B) gửi ảnh từng trường.  
+     - Lưu raw output JSON vào `data/ocr/raw/`.  
+   - **Tiêu chí:** JSON output phải parse được. Lưu kết quả thô cho mỗi query.  
+   - **Kiểm thử:** Chạy OCR cho page003: một bên output hàng, một bên output fields. Đảm bảo mỗi query thành công (mô hình không lỗi). 
+
+5. **XÁC THỰC & ĐỘI HÌNH ĐẦU RA (P8)**: Xử lý text và chuyển thành JSON cấu trúc.  
+   - **Mục tiêu:** Định dạng kết quả OCR thành JSON 14 trường canonical (như schema mẫu).  
+   - **Công việc:**  
+     - Viết code parse JSON thô từ Qwen, mapping vào schema.  
+     - Thực hiện validate JSON bằng JSON Schema (dùng thư viện `jsonschema`).  
+     - Xử lý ký tự không đọc được: thay bằng `[UNK]` hoặc `null` nếu blank. Theo gợi ý, prompt mẫu khuyến cáo thay ký tự mờ bằng `?`.  
+   - **Tiêu chí:** Mọi kết quả phải hợp lệ JSON theo schema. Required keys có đủ. Blank values→`null`, ký tự mờ→đặc biệt (ví dụ `?`).  
+   - **Kiểm thử:** Dùng `jsonschema` kiểm thử sample JSON output. Chạy script so khớp với GT để đánh giá. 
+
+6. **ĐÁNH GIÁ (P9)**: Đo hiệu năng và độ chính xác.  
+   - **Mục tiêu:** Tính CER/WER và accuracy các cấp (field, row, page). Theo khuyến nghị, CER/WER là cơ sở.  
+   - **Công việc:**  
+     - Viết script so sánh output với `dev_annotations.jsonl`. Ghi CSV kết quả.  
+     - Tính tỉ lệ valid JSON, CER, field-accuracy, row-accuracy, thời gian/truy vấn.  
+   - **Tiêu chí:** Nắm được baseline accuracy và performance.  
+   - **Kiểm thử:** Kết quả benchmark file (`evaluation/benchmark_results.csv`). Đảm bảo metrics có ý nghĩa (vd: xác định score).  
+
+7. **TÀI LIỆU CUỐI NGÀY (HANDOFF)**: Kết thúc ngày làm việc.  
+   - **Mục tiêu:** Ghi báo cáo tổng kết (Handoff Report).  
+   - **Công việc:**  
+     - Tạo file `docs/HANDOFF/2026-09-<ngày>_DAY1.md` với nội dung: mục tiêu, kết quả đã làm, file tạo/sửa, test, lỗi, quyết định, công việc chưa hoàn thành, gợi ý task tiếp theo.  
+     - Đưa tất cả artifact quan trọng (JSON, logs, benchmark) vào thư mục `docs/HANDOFF/`.  
+   - **Tiêu chí:** Báo cáo rõ ràng, đầy đủ như mẫu yêu cầu.  
+
+### Lịch trình ngày làm việc (10 giờ)
 
 ```mermaid
-gantt
-    title Lịch làm việc 10 giờ
-    dateFormat  HH:mm
-    axisFormat  HH:mm
-    section Sáng (GT)
-    Nhập liệu GT        :gt_done, 08:00, 4h
-    section Chiều
-    Thiết lập môi trường:setup, 13:00, 30m
-    Phân đoạn ảnh       :segment, after setup, 1h
-    Kiểm thử phân đoạn   :test_seg, after segment, 30m
-    Gọi Qwen OCR thử    :qwen_test, after test_seg, 30m
-    Xây pipeline cuối   :pipeline, after qwen_test, 1h
-    Kiểm thử & benchmark:benchmark, after pipeline, 30m
-    Tích hợp (Telegram/n8n):integrate, after benchmark, 30m
-    Dự phòng & tối ưu   :buffer, after integrate, 30m
+timeline
+    title Ngày 1 (08:00–18:00)
+    08:00: KHỞI ĐỘNG & KIỂM TRA MÔI TRƯỜNG
+    09:00: THỬ KẾT NỐI LM STUDIO
+    10:00: TEST CẮT ẢNH (P6)
+    11:00: THỬ QWEN OCR (P7) trên sample
+    12:00: GIẢI LAO
+    13:00: XỬ LÝ KẾT QUẢ OCR (P8)
+    14:00: XÁC THỰC & KIỂM TRA JSON
+    15:00: CHẠY BENCHMARK & ĐO METRIC (P9)
+    16:00: SÁNG TẠO VÀO BÁO CÁO (Handoff)
+    17:00: BUFFER TIME / HOÀN THIỆN
+    18:00: KẾT THÚC NGÀY 1
 ```
 
-- **Giải thích:** Buổi chiều bắt đầu 13:00 sau giờ nghỉ. Mỗi nhiệm vụ có trạng thái `after` để tự động tính thời gian liên tục. Ví dụ, sau khi `setup` xong (13:00–13:30) là `segment` (13:30–14:30), v.v. Nếu có nhiệm vụ rớt (vì GT kéo dài), có thể bỏ bớt phần *Tích hợp* hoặc *Dự phòng*.
+| Giờ        | Nội dung công việc chính                                 |
+|------------|----------------------------------------------------------|
+| 08:00–09:00 | Inspect repo & thiết lập môi trường, xác định endpoint    |
+| 09:00–10:00 | Kiểm tra kết nối LM Studio (health check, test model)     |
+| 10:00–11:00 | Xây test segmentation (20 row ×14 col)                    |
+| 11:00–12:00 | Tạo prompt Qwen, thử OCR trên crops đầu tiên               |
+| 12:00–13:00 | Nghỉ trưa                                                |
+| 13:00–14:00 | Xử lý đầu ra OCR: parse, chuyển thành JSON cấu trúc        |
+| 14:00–15:00 | Validate JSON, sửa lỗi nhỏ (đảm bảo theo schema)           |
+| 15:00–16:00 | Chạy benchmark so sánh với GT (tính CER, accuracy)         |
+| 16:00–17:00 | Ghi nhận kết quả, chuẩn bị báo cáo Handoff                 |
+| 17:00–18:00 | Hoàn thiện báo cáo, buffer, sẵn sàng sang ngày tiếp theo    |
+
+**Lưu ý:** Nếu hoàn thành mục tiêu sớm, tiếp tục sang mục tiêu kế tiếp trong lộ trình. Nếu gặp khó khăn hoặc thiếu thông tin, ghi lại **BLOCKERS.md** và dừng lại không đoán. Chỉ chuyển tiếp khi tiêu chí hiện tại đã đạt.
+
+**Không được phép:**  
+- Thêm trường mới vào JSON không theo hướng dẫn.  
+- Sửa lỗi content (spellings) theo ý định riêng.  
+- Đổi cấu trúc file hay xóa code cũ trước khi đảm bảo không ảnh hưởng.  
+- Tự ý chỉnh sửa hệ thống Telegram/n8n nếu chưa xong OCR.  
+- Tự tạo prompt thừa, chỉ làm theo yêu cầu.  
+
+## Tiếp theo  
+
+Sau khi hoàn thành Day 1, tiếp tục Day 2 theo lộ trình: tập trung vào cải thiện prompt (prompt engineering) và tích hợp sâu (validation, retry). Luôn cập nhật báo cáo cuối mỗi ngày. Chúc bạn thành công!  
+```
 
-## Tóm tắt & Tiêu chí  
-
-- **Thiết lập môi trường:** Cài đặt thành công `lmstudio` hoặc `openai` SDK, LM Studio server chạy, model Qwen tải xong. (Test: lệnh chat đơn giản có kết quả.)  
-- **Phân đoạn & cắt ảnh:** Tạo module `app/segmentation.py` với hàm cắt 20 hàng × 14 trường. Viết test tương ứng. (Test: script chạy mà không lỗi, ảnh cắt đúng ô.)  
-- **OCR với Qwen:** Xây prompt rõ ràng, yêu cầu trả về JSON. Sử dụng endpoint LM Studio (OpenAI-compatible). (Test: Qwen trả về JSON chứa đầy đủ 14 trường cho 1 hàng mẫu.)  
-- **Xử lý kết quả:** Dùng `json.loads(...)` để parse (theo [14†L181-L189]). Đưa vào DataFrame và xuất CSV. (Xem ví dụ [10] trên structured output).  
-- **Tích hợp Telegram/n8n:** Sử dụng HTTP API. Ví dụ gửi file qua Bot Telegram. (Cần có token/URL đúng.)  
-- **Kiểm thử & đo đạc:** Đo độ trễ mỗi hàng, throughput. So sánh dữ liệu OCR với GT (đánh giá tay). Đánh giá tổng thể: mô hình Qwen3-VL có *“hỗ trợ OCR mở rộng 32 ngôn ngữ, cải thiện parsing tài liệu dài”* nên kỳ vọng kết quả tốt.  
-
-## Nguồn tham khảo  
-- Tài liệu LM Studio Developer (Python SDK, REST API).  
-- Hướng dẫn *Structured Output* (JSON schema) của LM Studio.  
-- Mô hình Qwen3-VL-8B (HuggingFace): *“Expanded OCR: Supports 32 languages… improved long-document structure parsing.”*.  
-
-*Lưu ý:* Các thông tin về thư viện, lời nhắc (prompt), và mã code nên được điều chỉnh cho phù hợp thực tế khi triển khai. Các khung thời gian chỉ mang tính ước lượng. Nếu có chi tiết chưa rõ, đánh dấu `chưa biết` để cập nhật sau. Đồ thị trên sử dụng dạng **Mermaid** để minh họa luồng công việc và lịch trình.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-PROMPT
-
-
-
-
-
-
-
-
-
-
-
-Tao sẽ cung cấp cho mày một file roadmap Markdown về dự án Production OCR.
-
-Đây là tài liệu kế hoạch dài hạn. Mày phải đọc toàn bộ file trước khi làm bất kỳ thay đổi code nào.
-
-PROJECT:
-D:\production_ocr
-
-MỤC TIÊU:
-Xây dựng lại từ đầu một pipeline Production OCR dùng:
-
-Telegram
-→ n8n
-→ PDF/PNG/JPG input processing
-→ image preprocessing / form registration / segmentation
-→ Qwen3-VL-8B-Instruct-GGUF Q4_K_M chạy local qua LM Studio
-→ OCR + structured output
-→ Python validation / post-processing / retry
-→ Excel
-→ Telegram QC
-
-Hardware công ty:
-- GPU: NVIDIA RTX 3050 6GB
-- RAM: 32GB DDR5
-- CPU: Intel i7-14700K
-
-Model:
-- Qwen3-VL-8B-Instruct-GGUF
-- quantization: Q4_K_M
-- runtime: LM Studio local
-- model prompt chính phải nằm trong code/config của project
-- không phụ thuộc vào system prompt được cấu hình cố định trong LM Studio
-- system prompt chỉ được dùng khi thực sự cần để làm rõ behavior
-
-QUAN TRỌNG:
-
-Tao muốn làm lại từ đầu phần OCR/LM Studio baseline dù project có thể đã có code cũ.
-
-Không được tự động coi code hiện tại là đúng.
-Không được tự động xóa code cũ.
-Không được tự động sửa hàng loạt.
-
-Trước tiên phải inspect repository thực tế.
-
-==============================
-PHASE 0 — INSPECT FIRST
-==============================
-
-Hãy kiểm tra:
-
-1. Cây thư mục D:\production_ocr
-2. Các file Python hiện có
-3. requirements / pyproject / environment
-4. app/
-5. config/
-6. data/
-7. tests/
-8. models/
-9. scripts/
-10. PDF processor
-11. image preprocessing
-12. form registry
-13. form template
-14. segmentation nếu đã tồn tại
-15. Qwen/OCR code nếu đã tồn tại
-16. validator
-17. mapper
-18. excel writer
-19. Telegram integration
-20. n8n integration
-21. README / CLAUDE / project documentation
-
-Đặc biệt kiểm tra xem code hiện tại đang có phần nào liên quan tới:
-- Qwen
-- LM Studio
-- OpenAI-compatible API
-- image → model
-- prompt
-- JSON output
-- structured output
-- retry
-- OCR result parsing
-
-KHÔNG được giả định file nào tồn tại chỉ vì roadmap đề cập tới nó.
-
-Sau khi inspect xong:
-
-KHÔNG CODE NGAY.
-
-Hãy báo cáo cho tao:
-
-A. Current project tree
-B. Những module đã có
-C. Những module thiếu
-D. Những module có thể reuse
-E. Những module nên giữ nhưng chưa đụng vào
-F. Những module OCR/LM Studio cũ nên xem xét thay thế
-G. Các dependency hiện tại
-H. Python version
-I. LM Studio connectivity hiện tại nếu kiểm tra được
-J. Model identifier thực tế nếu xác định được
-K. API endpoint thực tế nếu xác định được
-L. Những điểm không khớp giữa roadmap và repository hiện tại
-
-Cuối report phải có:
-
-CURRENT STATE:
-- READY:
-- PARTIAL:
-- MISSING:
-- UNKNOWN:
-
-==============================
-PHASE 1 — ENVIRONMENT BASELINE
-==============================
-
-Sau khi tao xác nhận report, mới bắt đầu implement.
-
-Mục tiêu:
-
-LM Studio
-→ local API
-→ Python client
-→ Qwen3-VL-8B-Instruct
-→ một image test
-→ một OCR response
-
-Trước tiên xác định chính xác:
-
-- LM Studio server endpoint
-- model identifier
-- API compatibility
-- model loading status
-- context settings
-- GPU offload / CPU offload nếu kiểm tra được
-- VRAM/RAM behavior
-- generation parameters
-
-Không hard-code model ID nếu chưa xác định ID thực tế.
-
-Tạo một test nhỏ, độc lập để chứng minh:
-
-Python
-→ LM Studio
-→ Qwen3-VL-8B
-→ image input
-→ text response
-
-Lưu response raw để reproducibility.
-
-Không vội tích hợp Telegram/n8n.
-
-Acceptance:
-- server reachable
-- model reachable
-- image request thành công
-- response được lưu
-- lỗi có log rõ ràng
-
-==============================
-PHASE 2 — INPUT CONTRACT
-==============================
-
-Xác định contract chuẩn:
-
-PDF/PNG/JPG
-→ page image
-→ normalized/aligned image
-→ OCR input
-
-Không làm OCR trực tiếp trên PDF nếu architecture hiện tại đã có PDF processor.
-
-Xác định:
-- image format
-- resolution
-- color mode
-- DPI
-- resize policy
-- crop policy
-
-Không tự ý resize ảnh quá mạnh chỉ để giảm VRAM.
-
-Mục tiêu là giữ đủ thông tin cho handwritten OCR.
-
-==============================
-PHASE 3 — FORM / SEGMENTATION
-==============================
-
-Nếu repository đã có FormTemplate / registration / segmentation:
-
-- inspect trước
-- reuse nếu đúng
-- sửa tối thiểu
-- không duplicate geometry
-
-Mục tiêu cuối:
-
-aligned page
-→ rows
-→ fields
-
-Đối với T1/v1 hiện tại nếu đúng theo repository:
-20 rows
-×
-14 fields
-
-Nhưng phải lấy con số thực tế từ form configuration, KHÔNG hard-code nếu architecture đã có config.
-
-Segmentation phải độc lập với Qwen.
-
-Qwen không được tự quyết định geometry của form trong baseline đầu tiên nếu geometry đã biết.
-
-==============================
-PHASE 4 — QWEN OCR BASELINE
-==============================
-
-Đây là phase quan trọng nhất.
-
-Thiết kế OCR baseline theo hướng:
-
-image crop
-→ prompt trong code
-→ Qwen3-VL-8B
-→ structured result
-→ Python validation
-
-Prompt phải versioned.
-
-Ví dụ:
-
-prompts/
-  qwen_ocr/
-    v001/
-      row_ocr.txt
-      field_ocr.txt
-
-hoặc cấu trúc tương đương phù hợp repository.
-
-Không đặt business logic trong prompt.
-
-Prompt phải mô tả rõ:
-
-- đọc đúng chữ nhìn thấy
-- không suy đoán
-- không tự sửa spelling
-- không normalize dữ liệu
-- không copy dữ liệu từ row khác
-- blank → null
-- unreadable visible content → [UNK]
-- preserve visible text
-- output đúng schema
-
-Nếu có field-level OCR và row-level OCR thì phải benchmark cả hai trước khi quyết định architecture cuối.
-
-Không được mặc định rằng:
-"mỗi field = một request"
-là tốt nhất.
-
-Cần đo.
-
-==============================
-PHASE 5 — STRUCTURED OUTPUT
-==============================
-
-Thiết kế JSON schema canonical.
-
-Các field hiện tại:
-
-stt
-date
-order_code
-drawing_code
-revision
-work_code
-target_time
-start_time
-end_time
-processed_qty
-good_qty
-ng_qty
-process_detail
-note
-
-Không tự ý thêm field.
-
-Nếu cần metadata như:
-member_name
-week_number
-team_name
-
-phải phân biệt page/header metadata với row fields.
-
-Không đưa Tổ/Nhóm vào 14 row fields nếu không có quyết định schema mới.
-
-Structured output phải được kiểm tra:
-
-- JSON valid
-- schema valid
-- required keys
-- null handling
-- [UNK] handling
-- type handling
-- extra keys
-- missing keys
-
-Nếu LM Studio/model không reliably hỗ trợ structured output ở runtime thực tế:
-
-fallback:
-
-model text
-→ parser
-→ validator
-→ retry
-
-Không được giả định structured output luôn hoạt động.
-
-==============================
-PHASE 6 — RAW OUTPUT + REPRODUCIBILITY
-==============================
-
-Mỗi OCR run phải có khả năng trace:
-
-input image
-→ crop
-→ prompt version
-→ model identifier
-→ generation parameters
-→ raw model output
-→ parsed JSON
-→ validation result
-
-Thiết kế artifact/log phù hợp repository.
-
-Ví dụ có thể có:
-
-data/ocr/
-data/ocr/raw/
-data/ocr/parsed/
-logs/
-
-nhưng trước tiên inspect tree và chọn convention phù hợp.
-
-Mục tiêu:
-Một kết quả sai phải truy ngược được nguyên nhân.
-
-==============================
-PHASE 7 — VALIDATION + RETRY
-==============================
-
-Không để Qwen là source of truth.
-
-Python phải validate output.
-
-Validation gồm ít nhất:
-
-- schema
-- required fields
-- malformed JSON
-- impossible structure
-- unexpected extra fields
-- suspicious empty output
-- [UNK]
-- confidence / quality signal nếu thiết kế được
-- retry conditions
-
-Retry phải có giới hạn.
-
-Không loop vô hạn.
-
-Nếu retry:
-- lưu attempt 1
-- lưu attempt 2
-- ghi reason
-- ghi prompt/version/parameters nếu thay đổi
-
-==============================
-PHASE 8 — BENCHMARK
-==============================
-
-Không đánh giá model bằng cảm giác.
-
-Dùng Ground Truth đã có.
-
-Đo ít nhất:
-
-1. Character accuracy
-2. Field accuracy
-3. Row accuracy
-4. Page accuracy
-5. JSON validity rate
-6. Retry rate
-7. latency / row
-8. latency / page
-9. error categories
-10. VRAM/RAM behavior
-11. failure/OOM rate
-
-Nếu metric hiện tại của repository đã có thì reuse và không tạo metric trùng.
-
-Benchmark phải reproducible.
-
-Không được tự đặt mục tiêu accuracy rồi tuyên bố PASS nếu chưa có dữ liệu đủ.
-
-==============================
-PHASE 9 — PROMPT EXPERIMENT
-==============================
-
-Không sửa prompt ngẫu nhiên.
-
-Tạo version:
-
-v001
-v002
-v003
-...
-
-Mỗi version phải có:
-
-- hypothesis
-- change
-- dataset
-- result
-- failure cases
-
-Ví dụ:
-
-v001:
-basic transcription
-
-v002:
-explicit no-inference rules
-
-v003:
-field-aware instructions
-
-v004:
-handwriting-specific instructions
-
-Nhưng KHÔNG tạo hàng chục prompt ngay.
-
-Mỗi experiment phải có lý do.
-
-==============================
-PHASE 10 — QWEN INPUT STRATEGY
-==============================
-
-Benchmark ít nhất các strategy hợp lý:
-
-A. whole row → Qwen
-B. selected field crops → Qwen
-C. hybrid
-
-Không giả định strategy nào tốt nhất.
-
-So sánh:
-
-accuracy
-latency
-VRAM
-complexity
-retry behavior
-
-Sau benchmark mới chọn baseline strategy.
-
-==============================
-PHASE 11 — END-TO-END
-==============================
-
-Khi OCR baseline đã ổn định:
-
-Telegram
-→ n8n
-→ input
-→ PDF/image processing
-→ registration
-→ segmentation
-→ Qwen
-→ validation
-→ structured data
-→ Excel
-→ Telegram QC
-
-Tích hợp từng bước.
-
-Không làm Telegram/n8n trước khi OCR core có contract ổn định.
-
-==============================
-PHASE 12 — EXCEL + TELEGRAM QC
-==============================
-
-Reuse các module hiện có nếu phù hợp.
-
-Output phải giữ traceability:
-
-Telegram input
-→ document/page
-→ OCR run
-→ rows
-→ Excel
-→ QC result
-
-Không để integration làm mất raw OCR result.
-
-==============================
-PHASE 13 — HARDENING
-==============================
-
-Sau baseline mới làm:
-
-- error handling
-- timeout
-- retry
-- caching
-- deterministic settings nếu phù hợp
-- model loading strategy
-- concurrency policy
-- queueing
-- logging
-- config separation
-- secrets
-- monitoring
-- regression tests
-
-Không tối ưu premature.
-
-==============================
-PHASE 14 — FUTURE FINE-TUNING
-==============================
-
-Fine-tuning KHÔNG làm ngay.
-
-Chỉ chuẩn bị data contract.
-
-Ground truth phải có khả năng sau này chuyển thành:
-
-image
-+
-instruction
-+
-target output
-
-Dataset phải versioned.
-
-Khi baseline đủ mạnh và đã xác định error patterns mới quyết định:
-
-- fine-tuning có cần không
-- LoRA/QLoRA
-- model nào
-- dataset size
-- field-level hay row-level
-- training target
-
-Không fine-tune chỉ vì baseline chưa được benchmark đúng.
-
-==============================
-QUY TẮC LÀM VIỆC
-==============================
-
-1. INSPECT FIRST.
-2. REPORT BEFORE MODIFY.
-3. Không tạo file nếu chưa cần.
-4. Không duplicate module đã tồn tại.
-5. Không hard-code geometry nếu config đã có.
-6. Không hard-code model ID nếu chưa kiểm tra LM Studio.
-7. Không hard-code endpoint nếu chưa xác nhận.
-8. Không thay đổi schema nếu chưa có lý do.
-9. Không sửa nhiều module cùng lúc nếu chưa có test.
-10. Mỗi phase phải có acceptance criteria.
-11. Mỗi thay đổi phải có test hoặc verification tương ứng.
-12. Luôn giữ raw output để debug.
-13. Không xóa code cũ trước khi xác định nó đang được module nào sử dụng.
-14. Không tự ý triển khai Telegram/n8n/Excel nếu OCR core chưa ổn định.
-15. Không coi model output là sự thật; Python validation là bắt buộc.
-16. Không tối ưu accuracy bằng cách "sửa" dữ liệu OCR theo business knowledge.
-17. Không suy đoán chữ viết tay.
-18. Không copy giá trị từ row khác.
-19. Không normalize text nếu GT yêu cầu preserve visible text.
-20. Không làm fine-tuning trước baseline benchmark.
-
-==============================
-CÁCH TAO MUỐN MÀY LÀM
-==============================
-
-Mỗi lần làm việc:
-
-STEP 1:
-Inspect.
-
-STEP 2:
-Report current state.
-
-STEP 3:
-Đề xuất thay đổi nhỏ nhất để đạt phase hiện tại.
-
-STEP 4:
-Chờ tao xác nhận nếu thay đổi có ảnh hưởng architecture.
-
-STEP 5:
-Implement.
-
-STEP 6:
-Run test.
-
-STEP 7:
-Report:
-
-- files changed
-- files created
-- files untouched
-- commands executed
-- test results
-- artifacts generated
-- known issues
-- next recommended task
-
-Không được trả lời kiểu:
-"Đã hoàn thành pipeline."
-
-Phải báo cáo cụ thể bằng evidence.
-
-==============================
-TASK ĐẦU TIÊN
-==============================
-
-Đọc roadmap tao cung cấp.
-
-Sau đó inspect toàn bộ:
-
-D:\production_ocr
-
-CHƯA ĐƯỢC CODE.
-
-Chỉ report hiện trạng repository và xác định:
-
-"Ngày mai sau khi hoàn thành Ground Truth, task đầu tiên cần làm là gì?"
-
-Task đầu tiên phải ưu tiên xây nền LM Studio/Qwen baseline nhưng phải phù hợp với architecture end-to-end của project.
-
-Kết thúc bằng một execution plan nhỏ cho buổi chiều ngày mai, khoảng 3–4 giờ, nhưng KHÔNG vượt quá phạm vi cần thiết của ngày đầu tiên.
