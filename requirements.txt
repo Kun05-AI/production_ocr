@@ -15,3 +15,12 @@ openpyxl
 git clone https://github.com/Kun05-AI/production_ocr.git
 cd production_ocr
 python -m venv .venv
+
+
+Đọc 2 tài liệu trên.
+Bắt đầu bằng INSPECT thực tế project tại D:\production_ocr.
+Không code trước khi inspect.
+Sau khi inspect xong, báo cho tôi:
+1. current state thực tế
+2. các điểm khớp/khác với workplan
+3. task đầu tiên sẽ thực hiện

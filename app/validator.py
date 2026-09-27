@@ -36,9 +36,20 @@ def _valid_time(v: Any) -> bool:
 def validate_row(row: dict[str, Any]) -> ValidationResult:
     issues: list[str] = []
     ocr_fields = {
-        "stt", "date", "order_code", "drawing_code", "revision", "work_code",
-        "target_time", "start_time", "end_time", "processed_qty", "good_qty",
-        "ng_qty", "process_detail", "note",
+        "stt",
+        "date",
+        "order_code",
+        "drawing_code",
+        "work_code",
+        "target_time",
+        "start_time",
+        "end_time",
+        "total_time",
+        "processed_qty",
+        "good_qty",
+        "ng_qty",
+        "process_detail",
+        "note",
     }
     normalized = {
         key: (None if _is_blank(value) else str(value).strip())
@@ -66,7 +77,7 @@ def validate_row(row: dict[str, Any]) -> ValidationResult:
             issues.append(f"invalid_{key}")
             score -= 15
 
-    for key in ("order_code", "drawing_code", "revision", "work_code"):
+    for key in ("order_code", "drawing_code", "work_code"):
         v = normalized.get(key)
         if v is not None and len(v) > 120:
             issues.append(f"too_long_{key}")

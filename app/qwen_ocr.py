@@ -32,20 +32,20 @@ Quy tắc bắt buộc:
 
 Trả đúng JSON:
 {
-  "stt": null,
-  "date": null,
-  "order_code": null,
-  "drawing_code": null,
-  "revision": null,
-  "work_code": null,
-  "target_time": null,
-  "start_time": null,
-  "end_time": null,
-  "processed_qty": null,
-  "good_qty": null,
-  "ng_qty": null,
-  "process_detail": null,
-  "note": null
+    "stt": null,
+    "date": null,
+    "order_code": null,
+    "drawing_code": null,
+    "work_code": null,
+    "target_time": null,
+    "start_time": null,
+    "end_time": null,
+    "total_time": null,
+    "processed_qty": null,
+    "good_qty": null,
+    "ng_qty": null,
+    "process_detail": null,
+    "note": null
 }
 '''
 

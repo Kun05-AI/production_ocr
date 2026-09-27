@@ -29,17 +29,23 @@ stt
 date
 order_code
 drawing_code
-revision
 work_code
 target_time
 start_time
 end_time
+total_time
 processed_qty
 good_qty
 ng_qty
 process_detail
 note
 ```
+### Page-level total time
+
+When a page shows a page-level total for the `total_time` column, it represents
+the sum of `total_time` across that page's rows (rows 1..20).
+
+The page-level total is not stored inside `rows[*].ground_truth`.
 
 ## Separation rule
 

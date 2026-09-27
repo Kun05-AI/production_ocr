@@ -253,6 +253,7 @@ def build_page_annotations(
             "target_time",
             "start_time",
             "end_time",
+            "total_time",
             "processed_qty",
             "good_qty",
             "ng_qty",

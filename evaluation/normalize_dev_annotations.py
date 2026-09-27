@@ -2,13 +2,8 @@
 Production OCR - Normalize DEV Ground Truth annotations
 
 Purpose:
-    Convert the Phase 2 DEV annotation scaffold to the exact row schema
-    emitted/requested by app/qwen_ocr.py.
-
-Why this exists:
-    form.json currently contains `total_time`, while app/qwen_ocr.py uses
-    `revision` and does not emit `total_time`. Ground Truth used for OCR
-    accuracy must use the prediction schema, not the raw form field list.
+    Normalize the Phase 2 DEV annotation scaffold to the canonical
+    T1/v1 row schema shared by form.json and app/qwen_ocr.py.
 
 Input:
     evaluation/ground_truth/selection/dev_annotations.jsonl
@@ -22,19 +17,25 @@ Canonical fields:
     date
     order_code
     drawing_code
-    revision
     work_code
     target_time
     start_time
     end_time
+    total_time
     processed_qty
     good_qty
     ng_qty
     process_detail
     note
 
-This script only changes the schema scaffold. It does NOT fill any
-Ground Truth values and does NOT change the selected pages.
+Schema rules:
+    - `revision` is not a T1/v1 row field.
+    - `total_time` is a canonical row field.
+    - Page-level totals such as `33,75` are derived values and are not
+      stored inside rows[*].ground_truth.
+
+This script only changes the row schema scaffold.
+It does NOT fill Ground Truth values and does NOT change the selected pages.
 """
 
 from __future__ import annotations
@@ -60,20 +61,17 @@ CANONICAL_FIELDS = [
     "date",
     "order_code",
     "drawing_code",
-    "revision",
     "work_code",
     "target_time",
     "start_time",
     "end_time",
+    "total_time",
     "processed_qty",
     "good_qty",
     "ng_qty",
     "process_detail",
     "note",
 ]
-
-LEGACY_IGNORED_FIELDS = ["total_time"]
-
 
 def normalize_record(record: dict[str, Any]) -> dict[str, Any]:
     rows = record.get("rows")
@@ -108,15 +106,14 @@ def normalize_record(record: dict[str, Any]) -> dict[str, Any]:
         )
 
     output = dict(record)
+    output.pop("non_ocr_form_fields", None)
+
     output["annotation_schema"] = "qwen_row_v1"
     output["annotation_status"] = record.get(
         "annotation_status",
         "UNLABELED",
     )
     output["rows"] = normalized_rows
-
-    # Explicitly document the form-vs-OCR schema difference.
-    output["non_ocr_form_fields"] = LEGACY_IGNORED_FIELDS
 
     return output
 
@@ -196,11 +193,6 @@ def main() -> None:
     print("Canonical OCR fields:")
     for field in CANONICAL_FIELDS:
         print(f"  - {field}")
-    print()
-    print(
-        "Removed from row schema: "
-        + ", ".join(LEGACY_IGNORED_FIELDS)
-    )
     print()
     print(
         "No Ground Truth values were filled; selected pages are unchanged."
